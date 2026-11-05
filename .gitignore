@@ -1,0 +1,23 @@
+# Segredos
+.env
+*.env.local
+secrets.h
+
+# .NET
+bin/
+obj/
+
+# Node / Expo
+node_modules/
+.expo/
+
+# Python
+__pycache__/
+.venv/
+.ipynb_checkpoints/
+
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
