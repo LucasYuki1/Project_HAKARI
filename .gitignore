@@ -21,3 +21,9 @@ __pycache__/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Prints e PDF de entrega (contêm dados da conta)
+docs/testing/entrega/
+
+# Dados brutos do SP156 (baixar pelo link em ml/dados/README.md)
+ml/dados/raw/

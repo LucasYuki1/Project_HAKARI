@@ -1,0 +1,491 @@
+{
+  "epic": {
+    "title": "Hakari — iluminação pública que se reporta sozinha",
+    "description": "Rede de nós ESP32 acoplados aos postes existentes que ajustam o brilho conforme luz e presença, detectam a própria falha e abrem ocorrências automaticamente. O morador acompanha o status dos postes e reporta problemas pelo app; a equipe de manutenção atende a fila priorizada por severidade."
+  },
+  "features": [
+    {
+      "key": "F1",
+      "title": "F1 — Controle adaptativo de iluminação",
+      "story": "Como morador, quero que o poste ajuste o brilho conforme a luz do dia e a presença de pessoas, para que a rua fique iluminada quando eu passo sem desperdiçar energia quando está vazia.",
+      "criteria": "Cenário: Dia claro\n  Dado que a leitura do LDR ambiente indica ambiente claro\n  Quando o nó executa o ciclo de controle\n  Então o brilho da lâmpada é 0%\n\nCenário: Noite sem presença\n  Dado que o ambiente está escuro\n  E não há presença detectada\n  Quando o nó executa o ciclo de controle\n  Então o brilho da lâmpada é 30%\n\nCenário: Noite com presença\n  Dado que o ambiente está escuro\n  Quando uma pessoa é detectada a menos de 100 cm\n  Então o brilho da lâmpada sobe para 100%\n\nCenário: Fim da presença\n  Dado que a lâmpada está em 100% por presença\n  Quando não há presença detectada por 10 segundos\n  Então o brilho volta para 30%\n\nCenário: Telemetria publicada\n  Dado que o nó está conectado ao broker\n  Quando passam 30 segundos desde a última publicação\n  Então o nó publica um heartbeat com luminosidade, presença, brilho e RSSI"
+    },
+    {
+      "key": "F2",
+      "title": "F2 — Monitoramento de saúde dos nós",
+      "story": "Como equipe de manutenção, quero que cada nó seja monitorado continuamente e que falhas gerem alertas com severidade, para descobrir um poste apagado antes que o morador precise reclamar.",
+      "criteria": "Cenário: Lâmpada sem resposta\n  Dado que o brilho comandado do nó é maior que 0\n  Quando o LDR de referência lê escuro por 3 leituras seguidas\n  Então é gerado um alerta de severidade \"Alta\"\n  E uma ocorrência de origem \"Automática\" é aberta para o poste\n\nCenário: Isolamento total do nó\n  Dado que um nó está cadastrado e ativo\n  Quando a API não recebe nenhuma mensagem dele por 3 minutos\n  Então o nó passa ao status \"Isolado\"\n  E é gerado um alerta de severidade \"Desastre\"\n  E uma ocorrência de origem \"Automática\" é aberta para o poste\n\nCenário: Sinal fraco\n  Dado que um nó está online\n  Quando o RSSI fica abaixo de -80 dBm por 5 leituras seguidas\n  Então é gerado um alerta de severidade \"Aviso\"\n  E nenhuma ocorrência é aberta\n\nCenário: Recuperação do nó\n  Dado que existe um alerta ativo para um nó\n  Quando a condição que gerou o alerta deixa de ocorrer\n  Então o alerta é marcado como \"Normalizado\"\n  E a normalização é registrada no histórico da ocorrência\n  E a ocorrência permanece aberta até a manutenção resolvê-la\n\nCenário: Sem alertas duplicados\n  Dado que já existe um alerta ativo de um trigger para um nó\n  Quando a mesma condição continua ocorrendo\n  Então nenhum novo alerta é gerado para esse trigger"
+    },
+    {
+      "key": "F3",
+      "title": "F3 — Cadastro e autenticação do cidadão",
+      "story": "Como morador, quero criar uma conta e entrar no app, para reportar problemas e acompanhar o que reportei.",
+      "criteria": "Cenário: Cadastro válido\n  Dado que estou na tela de cadastro\n  Quando informo nome, e-mail, telefone e senha válidos\n  E aceito o termo de uso de dados\n  Então minha conta é criada\n  E sou levado à tela inicial já autenticado\n\nCenário: E-mail já cadastrado\n  Dado que já existe uma conta com o e-mail informado\n  Quando tento me cadastrar com esse e-mail\n  Então vejo a mensagem \"Este e-mail já está em uso\"\n  E nenhuma conta nova é criada\n\nCenário: Senha fraca\n  Quando informo uma senha com menos de 8 caracteres ou sem letra e número\n  Então vejo a mensagem explicando a regra da senha\n  E o cadastro não é concluído\n\nCenário: Termo de uso não aceito\n  Quando tento concluir o cadastro sem aceitar o termo de uso de dados\n  Então o botão de cadastro permanece desabilitado\n\nCenário: Login inválido\n  Dado que tenho uma conta\n  Quando informo a senha errada\n  Então vejo a mensagem \"E-mail ou senha incorretos\"\n  E não sou autenticado"
+    },
+    {
+      "key": "F4",
+      "title": "F4 — Consulta de postes do bairro",
+      "story": "Como morador, quero ver os postes próximos e o status de cada um, para saber quais ruas estão iluminadas antes de sair.",
+      "criteria": "Cenário: Lista de postes\n  Dado que estou autenticado\n  Quando abro a tela de postes\n  Então vejo cada poste com identificação, endereço e status\n\nCenário: Status legível\n  Dado que um poste tem alerta \"Alta\" ou \"Desastre\" ativo\n  Quando o poste aparece na lista\n  Então o status é exibido como \"Apagado\" ou \"Sem comunicação\", com cor e texto\n\nCenário: Detalhe do poste\n  Quando toco em um poste\n  Então vejo o status atual, a última comunicação e a ocorrência ativa, se houver\n\nCenário: API indisponível\n  Dado que a API não responde\n  Quando abro a tela de postes\n  Então vejo uma mensagem de erro com a opção \"Tentar novamente\""
+    },
+    {
+      "key": "F5",
+      "title": "F5 — Reporte de problema pelo cidadão",
+      "story": "Como morador, quero reportar um problema em um poste, para que a manutenção saiba de falhas que o sensor não detecta (poste danificado, lâmpada piscando).",
+      "criteria": "Cenário: Reporte válido\n  Dado que estou autenticado e abri o detalhe de um poste sem ocorrência ativa\n  Quando escolho uma categoria e escrevo uma descrição\n  E envio o reporte\n  Então uma ocorrência de origem \"Cidadão\" é aberta com status \"Aberta\"\n  E vejo o número da ocorrência\n\nCenário: Poste com ocorrência ativa\n  Dado que o poste já tem uma ocorrência ativa\n  Quando envio um reporte para esse poste\n  Então meu reporte é anexado à ocorrência existente como apoio\n  E nenhuma ocorrência nova é criada\n  E vejo a mensagem \"Este problema já está registrado. Seu apoio foi adicionado.\"\n\nCenário: Descrição vazia\n  Quando tento enviar o reporte sem descrição\n  Então vejo a mensagem \"Descreva o problema\"\n  E o reporte não é enviado\n\nCenário: Poste inexistente\n  Quando a API recebe um reporte para um poste que não existe\n  Então a resposta é 404\n  E nenhuma ocorrência é criada\n\nCenário: Apoio repetido\n  Dado que já apoiei uma ocorrência\n  Quando tento apoiá-la novamente\n  Então vejo a mensagem \"Você já apoiou esta ocorrência\""
+    },
+    {
+      "key": "F6",
+      "title": "F6 — Acompanhamento das minhas ocorrências",
+      "story": "Como morador, quero acompanhar as ocorrências que abri ou apoiei, para saber se o problema está sendo resolvido.",
+      "criteria": "Cenário: Lista das minhas ocorrências\n  Dado que abri ou apoiei ocorrências\n  Quando abro a tela \"Minhas ocorrências\"\n  Então vejo cada uma com poste, status e data de abertura\n\nCenário: Histórico da ocorrência\n  Quando toco em uma ocorrência\n  Então vejo o histórico de mudanças de status com data e hora\n\nCenário: Nenhuma ocorrência\n  Dado que nunca abri nem apoiei ocorrências\n  Quando abro a tela \"Minhas ocorrências\"\n  Então vejo a mensagem \"Você ainda não reportou nenhum problema\"\n\nCenário: Ocorrência de outro cidadão\n  Quando a API recebe um pedido de detalhe de uma ocorrência que não abri nem apoiei\n  Então os dados pessoais de quem abriu não são retornados"
+    },
+    {
+      "key": "F7",
+      "title": "F7 — Painel da equipe de manutenção",
+      "story": "Como técnico de manutenção, quero ver a fila de ocorrências priorizada por severidade e atualizar o status de cada uma, para atender primeiro o que deixa a rua no escuro.",
+      "criteria": "Cenário: Acesso restrito\n  Dado que estou autenticado como cidadão\n  Quando tento acessar o painel de manutenção\n  Então o acesso é negado\n\nCenário: Fila priorizada\n  Dado que estou autenticado como técnico\n  Quando abro o painel\n  Então vejo as ocorrências não resolvidas ordenadas por severidade e, depois, por data de abertura\n\nCenário: Assumir ocorrência\n  Dado que uma ocorrência está \"Aberta\"\n  Quando eu a assumo\n  Então o status passa a \"Em atendimento\"\n  E meu nome fica registrado como responsável\n\nCenário: Resolver ocorrência\n  Dado que uma ocorrência está \"Em atendimento\"\n  Quando eu a marco como resolvida informando o que foi feito\n  Então o status passa a \"Resolvida\"\n  E os cidadãos que abriram ou apoiaram veem a mudança em \"Minhas ocorrências\"\n\nCenário: Transição inválida\n  Dado que uma ocorrência está \"Aberta\"\n  Quando tento marcá-la como \"Resolvida\" sem antes assumi-la\n  Então vejo a mensagem \"Assuma a ocorrência antes de resolvê-la\"\n  E o status não muda"
+    },
+    {
+      "key": "F8",
+      "title": "F8 — Privacidade dos dados do cidadão",
+      "story": "Como morador, quero ver e excluir os dados pessoais que o app guarda sobre mim, para ter controle sobre minhas informações (LGPD).",
+      "criteria": "Cenário: Ver meus dados\n  Dado que estou autenticado\n  Quando abro \"Meus dados\"\n  Então vejo nome, e-mail e telefone cadastrados\n\nCenário: Excluir minha conta\n  Dado que estou autenticado\n  Quando confirmo a exclusão da conta\n  Então meus dados pessoais são removidos\n  E as ocorrências que abri permanecem, sem identificação do autor\n  E sou desconectado\n\nCenário: Dados pessoais fora dos logs\n  Quando qualquer requisição com e-mail, telefone ou senha é processada pela API\n  Então esses valores não aparecem em texto aberto nos logs\n\nCenário: Técnico não vê contato do cidadão\n  Dado que estou autenticado como técnico\n  Quando abro uma ocorrência de origem \"Cidadão\"\n  Então vejo o nome do cidadão abreviado e não vejo e-mail nem telefone"
+    }
+  ],
+  "testCases": [
+    {
+      "id": "CT-01", "feature": "F1", "kind": "Positivo", "priority": 1,
+      "title": "Poste desligado com ambiente claro",
+      "objective": "Verificar que o nó mantém a lâmpada apagada durante o dia.",
+      "preparation": "Simulação do nó em execução no Wokwi. Monitor serial aberto.",
+      "steps": [
+        ["Ajustar o LDR ambiente para 1000 lux (dia claro).", "Leitura do LDR ambiente abaixo de 3200."],
+        ["Aguardar um ciclo de controle (1 s).", "LED da lâmpada apagado e monitor serial exibe brilho 0%."]
+      ]
+    },
+    {
+      "id": "CT-02", "feature": "F1", "kind": "Positivo", "priority": 1,
+      "title": "Standby a 30% à noite sem presença",
+      "objective": "Verificar que a lâmpada fica em 30% quando está escuro e não há ninguém.",
+      "preparation": "Simulação do nó em execução no Wokwi. HC-SR04 ajustado para 300 cm.",
+      "steps": [
+        ["Ajustar o LDR ambiente para 1 lux (noite).", "Leitura do LDR ambiente acima de 3200."],
+        ["Aguardar um ciclo de controle.", "LED aceso com intensidade reduzida e monitor serial exibe brilho 30%."]
+      ]
+    },
+    {
+      "id": "CT-03", "feature": "F1", "kind": "Positivo", "priority": 1,
+      "title": "Brilho total com presença à noite",
+      "objective": "Verificar que a lâmpada sobe para 100% ao detectar uma pessoa no escuro.",
+      "preparation": "Nó no Wokwi com LDR ambiente em 1 lux e lâmpada em 30%.",
+      "steps": [
+        ["Ajustar o HC-SR04 para 50 cm.", "Monitor serial exibe presença detectada."],
+        ["Aguardar um ciclo de controle.", "LED em intensidade máxima e monitor serial exibe brilho 100%."]
+      ]
+    },
+    {
+      "id": "CT-04", "feature": "F1", "kind": "Positivo", "priority": 2,
+      "title": "Retorno ao standby 10 s após a presença",
+      "objective": "Verificar que a lâmpada volta a 30% depois de 10 segundos sem presença.",
+      "preparation": "Nó no Wokwi com LDR ambiente em 1 lux, HC-SR04 em 50 cm e lâmpada em 100%.",
+      "steps": [
+        ["Ajustar o HC-SR04 para 300 cm e iniciar a contagem do tempo.", "Lâmpada permanece em 100%."],
+        ["Aguardar 9 segundos.", "Lâmpada ainda em 100%."],
+        ["Aguardar mais 2 segundos.", "Lâmpada volta a 30%."]
+      ]
+    },
+    {
+      "id": "CT-05", "feature": "F1", "kind": "Positivo", "priority": 1,
+      "title": "Heartbeat publicado a cada 30 s",
+      "objective": "Verificar que o nó publica telemetria completa no intervalo definido.",
+      "preparation": "Nó no Wokwi conectado ao broker MQTT. MQTT Explorer inscrito em hakari/+/telemetry.",
+      "steps": [
+        ["Observar o tópico hakari/{id do nó}/telemetry por 70 segundos.", "Chegam pelo menos 2 mensagens com intervalo de aproximadamente 30 s."],
+        ["Abrir o conteúdo de uma mensagem.", "JSON contém node_id, lux, presença, brilho e rssi."]
+      ]
+    },
+    {
+      "id": "CT-06", "feature": "F1", "kind": "Negativo", "priority": 2,
+      "title": "Leitura inválida do sensor não aciona brilho total",
+      "objective": "Verificar que distância 0 ou fora do alcance não é tratada como presença.",
+      "preparation": "Nó no Wokwi com LDR ambiente em 1 lux e lâmpada em 30%.",
+      "steps": [
+        ["Ajustar o HC-SR04 para 0 cm (sem eco).", "Lâmpada permanece em 30%."],
+        ["Ajustar o HC-SR04 para 400 cm.", "Lâmpada permanece em 30%."]
+      ]
+    },
+    {
+      "id": "CT-07", "feature": "F1", "kind": "Negativo", "priority": 2,
+      "title": "Presença durante o dia não acende a lâmpada",
+      "objective": "Verificar que a presença só aumenta o brilho quando está escuro.",
+      "preparation": "Nó no Wokwi com LDR ambiente em 1000 lux.",
+      "steps": [
+        ["Ajustar o HC-SR04 para 50 cm.", "Monitor serial exibe presença detectada."],
+        ["Aguardar um ciclo de controle.", "Lâmpada permanece apagada (0%)."]
+      ]
+    },
+    {
+      "id": "CT-08", "feature": "F2", "kind": "Positivo", "priority": 1,
+      "title": "Lâmpada sem resposta gera alerta Alta e ocorrência",
+      "objective": "Verificar que a falha física da lâmpada é detectada e vira ocorrência automática.",
+      "preparation": "Nó no Wokwi conectado à API, LDR ambiente em 1 lux (lâmpada comandada em 30%). Poste sem ocorrência ativa.",
+      "steps": [
+        ["Ajustar o LDR de referência para 0 lux (lâmpada não acende).", "Monitor serial registra leitura de referência escura."],
+        ["Aguardar 3 leituras seguidas.", "Nó publica evento de falha de lâmpada."],
+        ["Consultar GET /alertas?poste={id} na API.", "Existe alerta ativo de severidade Alta para o poste."],
+        ["Consultar GET /ocorrencias?poste={id}.", "Existe ocorrência com origem Automática e status Aberta."]
+      ]
+    },
+    {
+      "id": "CT-09", "feature": "F2", "kind": "Negativo", "priority": 2,
+      "title": "Duas leituras escuras não geram alerta",
+      "objective": "Verificar que uma oscilação breve do sensor não abre ocorrência falsa.",
+      "preparation": "Mesmo cenário do CT-08.",
+      "steps": [
+        ["Ajustar o LDR de referência para 0 lux por 2 leituras e voltar ao valor normal.", "Nó continua publicando telemetria normal."],
+        ["Consultar GET /alertas?poste={id}.", "Nenhum alerta ativo para o poste."]
+      ]
+    },
+    {
+      "id": "CT-10", "feature": "F2", "kind": "Positivo", "priority": 1,
+      "title": "Isolamento total após 3 minutos sem comunicação",
+      "objective": "Verificar que um nó que para de se comunicar é marcado como Isolado com severidade Desastre.",
+      "preparation": "Nó no Wokwi publicando normalmente. Poste sem ocorrência ativa.",
+      "steps": [
+        ["Parar a simulação no Wokwi e anotar o horário.", "Mensagens do nó deixam de chegar ao broker."],
+        ["Aguardar 2 minutos e consultar GET /postes/{id}.", "Status do nó ainda é Online."],
+        ["Aguardar mais 1 minuto e consultar GET /postes/{id}.", "Status do nó é Isolado."],
+        ["Consultar GET /ocorrencias?poste={id}.", "Existe ocorrência Automática Aberta vinculada a alerta Desastre."]
+      ]
+    },
+    {
+      "id": "CT-11", "feature": "F2", "kind": "Positivo", "priority": 2,
+      "title": "Sinal fraco gera Aviso sem abrir ocorrência",
+      "objective": "Verificar que sinal fraco é sinalizado, mas não é tratado como falha do poste.",
+      "preparation": "MQTT Explorer conectado ao broker, publicando como o nó de teste.",
+      "steps": [
+        ["Publicar 5 heartbeats seguidos com rssi = -85.", "Mensagens aceitas pela API."],
+        ["Consultar GET /alertas?poste={id}.", "Existe alerta ativo de severidade Aviso."],
+        ["Consultar GET /ocorrencias?poste={id}.", "Nenhuma ocorrência ativa para o poste."]
+      ]
+    },
+    {
+      "id": "CT-12", "feature": "F2", "kind": "Positivo", "priority": 2,
+      "title": "Alerta normaliza e ocorrência continua aberta",
+      "objective": "Verificar que a recuperação do nó normaliza o alerta sem encerrar a ocorrência.",
+      "preparation": "Nó em estado Isolado com ocorrência Automática Aberta (resultado do CT-10).",
+      "steps": [
+        ["Reiniciar a simulação no Wokwi.", "Nó volta a publicar heartbeats."],
+        ["Consultar GET /alertas?poste={id}.", "Alerta Desastre aparece como Normalizado."],
+        ["Consultar o histórico da ocorrência.", "Histórico registra a normalização com data e hora e o status continua Aberta."]
+      ]
+    },
+    {
+      "id": "CT-13", "feature": "F2", "kind": "Negativo", "priority": 2,
+      "title": "Falha contínua não duplica alertas",
+      "objective": "Verificar que a mesma condição persistente gera apenas um alerta.",
+      "preparation": "Alerta Alta ativo para o poste (resultado do CT-08), LDR de referência mantido em 0 lux.",
+      "steps": [
+        ["Manter a condição por mais 10 leituras.", "Nó continua reportando a falha."],
+        ["Consultar GET /alertas?poste={id}.", "Existe apenas um alerta Alta ativo."],
+        ["Consultar GET /ocorrencias?poste={id}.", "Existe apenas uma ocorrência ativa."]
+      ]
+    },
+    {
+      "id": "CT-14", "feature": "F3", "kind": "Positivo", "priority": 1,
+      "title": "Cadastro de cidadão com dados válidos",
+      "objective": "Verificar que um morador consegue criar conta e entra autenticado.",
+      "preparation": "App aberto na tela de cadastro. E-mail morador01@hakari.test não cadastrado.",
+      "steps": [
+        ["Preencher nome 'Ana Teste', e-mail morador01@hakari.test, telefone (11) 90000-0001 e senha Teste1234.", "Campos aceitos sem mensagem de erro."],
+        ["Marcar o aceite do termo de uso de dados.", "Botão Cadastrar fica habilitado."],
+        ["Tocar em Cadastrar.", "Conta criada e app exibe a tela inicial autenticado."]
+      ]
+    },
+    {
+      "id": "CT-15", "feature": "F3", "kind": "Negativo", "priority": 1,
+      "title": "Cadastro com e-mail já existente",
+      "objective": "Verificar que não é possível criar duas contas com o mesmo e-mail.",
+      "preparation": "Conta morador01@hakari.test já criada (CT-14).",
+      "steps": [
+        ["Preencher o cadastro com e-mail morador01@hakari.test e demais dados válidos.", "Campos aceitos."],
+        ["Aceitar o termo e tocar em Cadastrar.", "Mensagem 'Este e-mail já está em uso' e nenhuma conta nova criada."]
+      ]
+    },
+    {
+      "id": "CT-16", "feature": "F3", "kind": "Negativo", "priority": 2,
+      "title": "Cadastro com senha curta",
+      "objective": "Verificar que senha com menos de 8 caracteres é recusada.",
+      "preparation": "App na tela de cadastro.",
+      "steps": [
+        ["Preencher dados válidos com senha Ab1.", "Mensagem explicando a regra da senha."],
+        ["Tentar concluir o cadastro.", "Cadastro não é concluído."]
+      ]
+    },
+    {
+      "id": "CT-17", "feature": "F3", "kind": "Negativo", "priority": 2,
+      "title": "Cadastro com senha sem número",
+      "objective": "Verificar que senha sem letra e número é recusada.",
+      "preparation": "App na tela de cadastro.",
+      "steps": [
+        ["Preencher dados válidos com senha abcdefgh.", "Mensagem explicando a regra da senha."],
+        ["Tentar concluir o cadastro.", "Cadastro não é concluído."]
+      ]
+    },
+    {
+      "id": "CT-18", "feature": "F3", "kind": "Negativo", "priority": 2,
+      "title": "Cadastro sem aceite do termo de uso",
+      "objective": "Verificar que o cadastro exige consentimento de uso de dados.",
+      "preparation": "App na tela de cadastro.",
+      "steps": [
+        ["Preencher todos os campos com dados válidos sem marcar o termo.", "Botão Cadastrar permanece desabilitado."]
+      ]
+    },
+    {
+      "id": "CT-19", "feature": "F3", "kind": "Positivo", "priority": 1,
+      "title": "Login com credenciais válidas",
+      "objective": "Verificar que um cidadão cadastrado consegue entrar no app.",
+      "preparation": "Conta morador01@hakari.test existente. App na tela de login.",
+      "steps": [
+        ["Informar e-mail morador01@hakari.test e senha Teste1234.", "Campos aceitos."],
+        ["Tocar em Entrar.", "App exibe a tela inicial autenticado."]
+      ]
+    },
+    {
+      "id": "CT-20", "feature": "F3", "kind": "Negativo", "priority": 1,
+      "title": "Login com senha incorreta",
+      "objective": "Verificar que senha errada não autentica e não revela se o e-mail existe.",
+      "preparation": "Conta morador01@hakari.test existente. App na tela de login.",
+      "steps": [
+        ["Informar e-mail morador01@hakari.test e senha Errada999.", "Campos aceitos."],
+        ["Tocar em Entrar.", "Mensagem 'E-mail ou senha incorretos' e usuário continua na tela de login."]
+      ]
+    },
+    {
+      "id": "CT-21", "feature": "F4", "kind": "Positivo", "priority": 1,
+      "title": "Listagem de postes com status",
+      "objective": "Verificar que o morador vê os postes com identificação, endereço e status.",
+      "preparation": "Cidadão autenticado. Banco com postes de seed.",
+      "steps": [
+        ["Abrir a tela de postes.", "Lista exibe cada poste com identificação, endereço e status."]
+      ]
+    },
+    {
+      "id": "CT-22", "feature": "F4", "kind": "Positivo", "priority": 1,
+      "title": "Status Apagado e Sem comunicação exibidos com cor e texto",
+      "objective": "Verificar que o status de falha é legível sem depender só da cor.",
+      "preparation": "Um poste com alerta Alta ativo e outro com alerta Desastre ativo. Cidadão autenticado.",
+      "steps": [
+        ["Abrir a tela de postes.", "Poste com alerta Alta aparece como 'Apagado' com cor de alerta."],
+        ["Localizar o poste com alerta Desastre.", "Aparece como 'Sem comunicação' com cor de alerta."]
+      ]
+    },
+    {
+      "id": "CT-23", "feature": "F4", "kind": "Positivo", "priority": 2,
+      "title": "Detalhe do poste",
+      "objective": "Verificar que o detalhe mostra status, última comunicação e ocorrência ativa.",
+      "preparation": "Poste com ocorrência ativa. Cidadão autenticado na tela de postes.",
+      "steps": [
+        ["Tocar no poste.", "Tela de detalhe exibe status atual e horário da última comunicação."],
+        ["Verificar a seção de ocorrência.", "Ocorrência ativa exibida com número e status."]
+      ]
+    },
+    {
+      "id": "CT-24", "feature": "F4", "kind": "Negativo", "priority": 2,
+      "title": "Tela de postes com API indisponível",
+      "objective": "Verificar que o app informa o erro e permite tentar de novo.",
+      "preparation": "Cidadão autenticado. API parada.",
+      "steps": [
+        ["Abrir a tela de postes.", "Mensagem de erro com o botão 'Tentar novamente'."],
+        ["Subir a API e tocar em 'Tentar novamente'.", "Lista de postes é carregada."]
+      ]
+    },
+    {
+      "id": "CT-25", "feature": "F4", "kind": "Negativo", "priority": 2,
+      "title": "Consulta de postes sem autenticação",
+      "objective": "Verificar que a API exige autenticação para listar postes.",
+      "preparation": "Swagger da API aberto, sem token.",
+      "steps": [
+        ["Executar GET /postes sem o cabeçalho Authorization.", "Resposta 401 sem dados de postes."]
+      ]
+    },
+    {
+      "id": "CT-26", "feature": "F5", "kind": "Positivo", "priority": 1,
+      "title": "Reporte de problema em poste sem ocorrência",
+      "objective": "Verificar que o morador consegue abrir uma ocorrência.",
+      "preparation": "Cidadão autenticado no detalhe de um poste sem ocorrência ativa.",
+      "steps": [
+        ["Tocar em Reportar problema.", "Formulário exibe categorias e campo de descrição."],
+        ["Escolher a categoria 'Lâmpada piscando' e descrever 'Pisca a noite toda'.", "Campos aceitos."],
+        ["Enviar.", "Mensagem de sucesso com o número da ocorrência."],
+        ["Abrir o detalhe do poste novamente.", "Ocorrência com origem Cidadão e status Aberta."]
+      ]
+    },
+    {
+      "id": "CT-27", "feature": "F5", "kind": "Positivo", "priority": 1,
+      "title": "Reporte em poste com ocorrência ativa vira apoio",
+      "objective": "Verificar que reportes repetidos não duplicam ocorrências.",
+      "preparation": "Poste com ocorrência ativa aberta por outro cidadão. Segundo cidadão autenticado.",
+      "steps": [
+        ["Reportar um problema nesse poste com categoria e descrição.", "Mensagem 'Este problema já está registrado. Seu apoio foi adicionado.'"],
+        ["Consultar GET /ocorrencias?poste={id}.", "Continua existindo apenas uma ocorrência ativa, com o apoio registrado."]
+      ]
+    },
+    {
+      "id": "CT-28", "feature": "F5", "kind": "Negativo", "priority": 2,
+      "title": "Reporte sem descrição",
+      "objective": "Verificar que a descrição é obrigatória.",
+      "preparation": "Cidadão autenticado no formulário de reporte.",
+      "steps": [
+        ["Escolher uma categoria e deixar a descrição vazia.", "Campo de descrição vazio."],
+        ["Tentar enviar.", "Mensagem 'Descreva o problema' e reporte não é enviado."]
+      ]
+    },
+    {
+      "id": "CT-29", "feature": "F5", "kind": "Negativo", "priority": 2,
+      "title": "Reporte para poste inexistente",
+      "objective": "Verificar que a API recusa reporte de poste que não existe.",
+      "preparation": "Swagger com token de cidadão.",
+      "steps": [
+        ["Executar POST /ocorrencias com poste P-999 e descrição válida.", "Resposta 404."],
+        ["Consultar GET /ocorrencias?poste=P-999.", "Nenhuma ocorrência criada."]
+      ]
+    },
+    {
+      "id": "CT-30", "feature": "F5", "kind": "Negativo", "priority": 2,
+      "title": "Apoio repetido na mesma ocorrência",
+      "objective": "Verificar que o mesmo cidadão não apoia a mesma ocorrência duas vezes.",
+      "preparation": "Cidadão que já apoiou a ocorrência (CT-27).",
+      "steps": [
+        ["Reportar novamente um problema no mesmo poste.", "Mensagem 'Você já apoiou esta ocorrência' e contagem de apoios não muda."]
+      ]
+    },
+    {
+      "id": "CT-31", "feature": "F6", "kind": "Positivo", "priority": 1,
+      "title": "Lista das minhas ocorrências",
+      "objective": "Verificar que o morador vê as ocorrências que abriu ou apoiou.",
+      "preparation": "Cidadão que abriu uma ocorrência (CT-26) e apoiou outra (CT-27).",
+      "steps": [
+        ["Abrir 'Minhas ocorrências'.", "As duas ocorrências aparecem com poste, status e data de abertura."]
+      ]
+    },
+    {
+      "id": "CT-32", "feature": "F6", "kind": "Positivo", "priority": 2,
+      "title": "Histórico de status da ocorrência",
+      "objective": "Verificar que o morador vê a linha do tempo da ocorrência.",
+      "preparation": "Ocorrência que já passou por Aberta e Em atendimento.",
+      "steps": [
+        ["Tocar na ocorrência em 'Minhas ocorrências'.", "Histórico mostra cada mudança de status com data e hora."]
+      ]
+    },
+    {
+      "id": "CT-33", "feature": "F6", "kind": "Negativo", "priority": 2,
+      "title": "Minhas ocorrências vazia",
+      "objective": "Verificar o estado vazio para quem nunca reportou.",
+      "preparation": "Cidadão recém-cadastrado, sem reportes nem apoios.",
+      "steps": [
+        ["Abrir 'Minhas ocorrências'.", "Mensagem 'Você ainda não reportou nenhum problema'."]
+      ]
+    },
+    {
+      "id": "CT-34", "feature": "F6", "kind": "Negativo", "priority": 1,
+      "title": "Ocorrência de outro cidadão sem dados pessoais",
+      "objective": "Verificar que a API não expõe dados de quem abriu a ocorrência.",
+      "preparation": "Ocorrência aberta pelo cidadão A. Swagger com token do cidadão B.",
+      "steps": [
+        ["Executar GET /ocorrencias/{id} da ocorrência do cidadão A.", "Resposta não contém nome, e-mail nem telefone do cidadão A."]
+      ]
+    },
+    {
+      "id": "CT-35", "feature": "F7", "kind": "Negativo", "priority": 1,
+      "title": "Cidadão não acessa o painel de manutenção",
+      "objective": "Verificar que o painel é restrito a técnicos.",
+      "preparation": "Swagger com token de cidadão.",
+      "steps": [
+        ["Executar GET /manutencao/fila.", "Resposta 403."],
+        ["No app, autenticado como cidadão, procurar a área de manutenção.", "Área de manutenção não aparece."]
+      ]
+    },
+    {
+      "id": "CT-36", "feature": "F7", "kind": "Positivo", "priority": 1,
+      "title": "Fila ordenada por severidade e data",
+      "objective": "Verificar que o técnico atende primeiro o que é mais grave.",
+      "preparation": "Ocorrências abertas: uma Desastre, uma Alta e duas de origem Cidadão com datas diferentes. Técnico de seed autenticado.",
+      "steps": [
+        ["Abrir o painel de manutenção.", "Ordem: Desastre, Alta e depois as de Cidadão da mais antiga para a mais nova."],
+        ["Verificar se há ocorrências Resolvidas na fila.", "Nenhuma ocorrência Resolvida aparece."]
+      ]
+    },
+    {
+      "id": "CT-37", "feature": "F7", "kind": "Positivo", "priority": 1,
+      "title": "Técnico assume ocorrência",
+      "objective": "Verificar a transição Aberta → Em atendimento com responsável.",
+      "preparation": "Técnico autenticado no painel com uma ocorrência Aberta.",
+      "steps": [
+        ["Abrir a ocorrência e tocar em Assumir.", "Status muda para 'Em atendimento'."],
+        ["Verificar o campo responsável.", "Nome do técnico registrado como responsável."]
+      ]
+    },
+    {
+      "id": "CT-38", "feature": "F7", "kind": "Positivo", "priority": 1,
+      "title": "Técnico resolve ocorrência e cidadão vê",
+      "objective": "Verificar o encerramento e a visibilidade para o morador.",
+      "preparation": "Ocorrência Em atendimento pelo técnico, aberta pelo cidadão do CT-26.",
+      "steps": [
+        ["Tocar em Resolver e informar 'Lâmpada substituída'.", "Status muda para 'Resolvida'."],
+        ["Entrar como o cidadão e abrir 'Minhas ocorrências'.", "Ocorrência aparece como Resolvida, com a mudança no histórico."]
+      ]
+    },
+    {
+      "id": "CT-39", "feature": "F7", "kind": "Negativo", "priority": 2,
+      "title": "Resolver ocorrência sem assumir",
+      "objective": "Verificar que não é possível pular o status Em atendimento.",
+      "preparation": "Técnico autenticado com uma ocorrência Aberta. Swagger com token de técnico.",
+      "steps": [
+        ["Executar PATCH /ocorrencias/{id}/status com status Resolvida.", "Resposta 409 com a mensagem 'Assuma a ocorrência antes de resolvê-la'."],
+        ["Consultar GET /ocorrencias/{id}.", "Status continua Aberta."]
+      ]
+    },
+    {
+      "id": "CT-40", "feature": "F8", "kind": "Positivo", "priority": 2,
+      "title": "Visualizar meus dados",
+      "objective": "Verificar que o morador vê os dados pessoais guardados.",
+      "preparation": "Cidadão morador01@hakari.test autenticado.",
+      "steps": [
+        ["Abrir 'Meus dados'.", "Tela exibe nome, e-mail e telefone cadastrados, sem a senha."]
+      ]
+    },
+    {
+      "id": "CT-41", "feature": "F8", "kind": "Positivo", "priority": 1,
+      "title": "Excluir conta mantém ocorrências anonimizadas",
+      "objective": "Verificar a exclusão de dados pessoais sem perder o histórico público.",
+      "preparation": "Cidadão autenticado que abriu ao menos uma ocorrência.",
+      "steps": [
+        ["Abrir 'Meus dados', tocar em Excluir conta e confirmar.", "Usuário é desconectado."],
+        ["Tentar entrar com o mesmo e-mail e senha.", "Mensagem 'E-mail ou senha incorretos'."],
+        ["Entrar como técnico e abrir a ocorrência que o cidadão abriu.", "Ocorrência existe e o autor aparece como 'Cidadão removido'."]
+      ]
+    },
+    {
+      "id": "CT-42", "feature": "F8", "kind": "Negativo", "priority": 1,
+      "title": "Dados pessoais não aparecem nos logs",
+      "objective": "Verificar que e-mail, telefone e senha não são gravados em texto aberto.",
+      "preparation": "API em execução com log ativo.",
+      "steps": [
+        ["Cadastrar o cidadão morador02@hakari.test com telefone (11) 90000-0002 e senha Teste1234.", "Cadastro concluído."],
+        ["Pesquisar no arquivo de log por 'morador02', '90000-0002' e 'Teste1234'.", "Nenhum dos valores aparece em texto aberto."]
+      ]
+    },
+    {
+      "id": "CT-43", "feature": "F8", "kind": "Negativo", "priority": 1,
+      "title": "Técnico não vê contato do cidadão",
+      "objective": "Verificar que a manutenção recebe só o necessário para atender.",
+      "preparation": "Ocorrência de origem Cidadão aberta por 'Ana Teste'. Técnico autenticado.",
+      "steps": [
+        ["Abrir a ocorrência no painel de manutenção.", "Autor aparece como 'Ana T.'."],
+        ["Verificar os dados exibidos e a resposta de GET /ocorrencias/{id}.", "Nenhum e-mail ou telefone do cidadão é exibido ou retornado."]
+      ]
+    }
+  ]
+}
