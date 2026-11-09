@@ -1,0 +1,192 @@
+{
+  "version": 1,
+  "author": "Lucas Yuki",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldrAmbiente",
+      "top": 30,
+      "left": -250,
+      "attrs": {
+        "lux": "500"
+      }
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldrRef",
+      "top": 110,
+      "left": -250,
+      "attrs": {
+        "lux": "300"
+      }
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "ultrassom",
+      "top": -10,
+      "left": 170,
+      "attrs": {
+        "distance": "250"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "lampada",
+      "top": 190,
+      "left": -150,
+      "attrs": {
+        "color": "yellow",
+        "label": "Lâmpada"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 260,
+      "left": -158,
+      "rotate": 90,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "alerta",
+      "top": 190,
+      "left": -90,
+      "attrs": {
+        "color": "red",
+        "label": "Alerta"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 260,
+      "left": -98,
+      "rotate": 90,
+      "attrs": {
+        "value": "220"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "esp:TX0",
+      "$serialMonitor:RX",
+      "",
+      []
+    ],
+    [
+      "esp:RX0",
+      "$serialMonitor:TX",
+      "",
+      []
+    ],
+    [
+      "ldrAmbiente:VCC",
+      "esp:3V3",
+      "red",
+      []
+    ],
+    [
+      "ldrAmbiente:GND",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "ldrAmbiente:AO",
+      "esp:D34",
+      "green",
+      []
+    ],
+    [
+      "ldrRef:VCC",
+      "esp:3V3",
+      "red",
+      []
+    ],
+    [
+      "ldrRef:GND",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "ldrRef:AO",
+      "esp:D35",
+      "orange",
+      []
+    ],
+    [
+      "ultrassom:VCC",
+      "esp:VIN",
+      "red",
+      []
+    ],
+    [
+      "ultrassom:GND",
+      "esp:GND.2",
+      "black",
+      []
+    ],
+    [
+      "ultrassom:TRIG",
+      "esp:D5",
+      "blue",
+      []
+    ],
+    [
+      "ultrassom:ECHO",
+      "esp:D18",
+      "purple",
+      []
+    ],
+    [
+      "esp:D26",
+      "lampada:A",
+      "gold",
+      []
+    ],
+    [
+      "lampada:C",
+      "r1:1",
+      "black",
+      []
+    ],
+    [
+      "r1:2",
+      "esp:GND.2",
+      "black",
+      []
+    ],
+    [
+      "esp:D27",
+      "alerta:A",
+      "red",
+      []
+    ],
+    [
+      "alerta:C",
+      "r2:1",
+      "black",
+      []
+    ],
+    [
+      "r2:2",
+      "esp:GND.2",
+      "black",
+      []
+    ]
+  ],
+  "dependencies": {}
+}
