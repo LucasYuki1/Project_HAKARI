@@ -6,7 +6,7 @@ export default function AbasDaManutencao() {
   return (
     <Tabs screenOptions={opcoesDasAbas}>
       <Tabs.Screen
-        name="fila"
+        name="index"
         options={{ title: 'Fila de atendimento', tabBarLabel: 'Fila', tabBarIcon: iconeDaAba('list-outline') }}
       />
       <Tabs.Screen

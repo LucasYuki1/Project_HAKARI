@@ -1,6 +1,6 @@
 # Hakari — nó de poste (ESP32 no Wokwi)
 
-**Projeto no Wokwi:** _[link](https://wokwi.com/projects/480175142815074305)_
+**Projeto no Wokwi:** [wokwi.com/projects/480175142815074305](https://wokwi.com/projects/480175142815074305) · **Vídeo:** [youtu.be/5VemTcVYxiI](https://youtu.be/5VemTcVYxiI)
 **Aluno:** Lucas Yuki — RM 554865
 
 ## Onde o circuito entra na solução

@@ -1,7 +1,7 @@
 # Hakari: app do cidadão e da manutenção
 
 **Mobile Development & IOT · Global Solution 2026/2 · CitizenTech**
-**Aluno:** Lucas Yuki (RM 554865) · **Vídeo:** _link do vídeo_
+**Aluno:** Lucas Yuki (RM 554865) · **Vídeo:** [youtu.be/vBNsQpimQ6A](https://youtu.be/vBNsQpimQ6A)
 
 A Ficha da CitizenTech está no [README da raiz](../README.md).
 
@@ -32,13 +32,20 @@ severidade, assume a ocorrência e registra a solução.
 | Bairros | Técnico | Situação da iluminação por bairro |
 | Perfil / Conta | Todos | Meus dados, sair e excluir a conta |
 
-Prints em [`docs/prints`](docs/prints).
+### Prints
+
+| | | | | |
+|---|---|---|---|---|
+| ![Entrar](docs/prints/01-entrar.jpg) | ![Criar conta](docs/prints/02-cadastro.jpg) | ![Postes](docs/prints/03-postes.jpg) | ![Poste](docs/prints/04-poste.jpg) | ![Reportar](docs/prints/05-reportar.jpg) |
+| Entrar | Criar conta | Postes | Detalhe do poste | Reportar |
+| ![Ocorrência](docs/prints/06-ocorrencia.jpg) | ![Meus reportes](docs/prints/07-meus-reportes.jpg) | ![Fila](docs/prints/08-fila.jpg) | ![Assumir](docs/prints/09-assumir.jpg) | ![Sem internet](docs/prints/10-offline.jpg) |
+| Ocorrência e linha do tempo | Meus reportes | Fila do técnico | Técnico assume | Sem internet: lista salva |
 
 ## Como atende cada critério
 
 | Critério | Onde está |
 |---|---|
-| **Telas e navegação** | Expo Router em `src/app/`: pilha principal com rotas protegidas por perfil (`_layout.tsx`), abas do cidadão em `(cidadao)/` e da manutenção em `(tecnico)/`, rotas dinâmicas `poste/[id]`, `ocorrencia/[id]` e `reportar/[id]` |
+| **Telas e navegação** | Expo Router em `src/app/`: pilha principal com rotas protegidas por perfil (`_layout.tsx`), abas do cidadão em `(cidadao)/` e da manutenção em `manutencao/`, rotas dinâmicas `poste/[id]`, `ocorrencia/[id]` e `reportar/[id]` |
 | **Consumo de dados** | A API REST do projeto (`../api`). `src/api/cliente.ts` envia o token JWT, aplica tempo limite e transforma os erros da API em mensagens simples; `src/api/hakari.ts` tem uma função por endpoint |
 | **Banco de dados** | SQLite no celular (`expo-sqlite`), em `src/dados/banco.ts`: sessão (o app abre já logado), postes salvos para consulta sem internet, rascunhos de reporte e o endereço do servidor |
 | **Acessibilidade** | Ver a seção abaixo |
@@ -93,7 +100,7 @@ Leia o QR code com o Expo Go (Android) ou com a câmera (iOS).
 src/
   app/              telas (cada arquivo é uma rota do Expo Router)
     (cidadao)/      abas do cidadão: Postes, Meus reportes, Perfil
-    (tecnico)/      abas da manutenção: Fila, Bairros, Conta
+    manutencao/      abas da manutenção: Fila, Bairros, Conta
     poste/[id]      detalhe do poste
     ocorrencia/[id] detalhe e linha do tempo da ocorrência
     reportar/[id]   formulário de reporte

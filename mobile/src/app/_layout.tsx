@@ -43,7 +43,7 @@ function Navegacao() {
       </Stack.Protected>
 
       <Stack.Protected guard={perfil === 'Tecnico'}>
-        <Stack.Screen name="(tecnico)" options={{ headerShown: false }} />
+        <Stack.Screen name="manutencao" options={{ headerShown: false }} />
       </Stack.Protected>
 
       <Stack.Protected guard={!!sessao}>

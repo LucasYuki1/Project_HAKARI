@@ -25,14 +25,14 @@ ESP32 no poste ──MQTT──> broker ──> API Hakari (.NET + PostgreSQL) �
 
 ## Pastas
 
-| Pasta | Disciplina | O que tem |
-|---|---|---|
-| [`docs/testing`](docs/testing) | Testing, Compliance & QA | Features, critérios de aceite em Gherkin, importação no Azure Boards |
-| [`ml`](ml) | Inteligência Artificial & Machine Learning | Notebook, preparo dos dados do SP156 e `RELATORIO_ML.md` |
-| [`iot`](iot) | Physical Computing | Sketch do ESP32, circuito do Wokwi e documentação |
-| [`api`](api) | SOA e Web Services · C# Software Development | API REST, banco, testes e evidências |
-| [`mobile`](mobile) | Mobile Development & IOT | App em Expo com React Native e TypeScript |
-| [`infra`](infra) | Operating Systems | Provisionamento e monitoramento em Linux |
+| Pasta | Disciplina | O que tem | Vídeo |
+|---|---|---|---|
+| [`docs/testing`](docs/testing) | Testing, Compliance & QA | Features, critérios de aceite em Gherkin, importação no Azure Boards | — |
+| [`ml`](ml) | Inteligência Artificial & Machine Learning | Notebook, preparo dos dados do SP156 e `RELATORIO_ML.md` | [YouTube](https://youtu.be/G1ZjQpvnstI) |
+| [`iot`](iot) | Physical Computing | Sketch do ESP32, circuito do Wokwi e documentação | [YouTube](https://youtu.be/5VemTcVYxiI) |
+| [`api`](api) | SOA e Web Services · C# Software Development | API REST, banco, testes e evidências | — |
+| [`mobile`](mobile) | Mobile Development & IOT | App em Expo com React Native e TypeScript | [YouTube](https://youtu.be/vBNsQpimQ6A) |
+| [`infra`](infra) | Operating Systems | Provisionamento e monitoramento em Linux | — |
 
 O uso de IA em cada parte está registrado em [`prompts.md`](prompts.md). Todos os dados de pessoas
 são fictícios; os dados do SP156 são públicos e não têm dados pessoais.

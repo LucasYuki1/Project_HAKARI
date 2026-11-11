@@ -1,7 +1,7 @@
 # Relatório de Machine Learning — Hakari
 
 **Aluno:** Lucas Henzo Ide Yuki — RM 554865
-**Notebook:** [`hakari_ml.ipynb`](hakari_ml.ipynb) · **Dados:** [`dados/README.md`](dados/README.md)
+**Notebook:** [`hakari_ml.ipynb`](hakari_ml.ipynb) · **Dados:** [`dados/README.md`](dados/README.md) · **Vídeo:** [youtu.be/G1ZjQpvnstI](https://youtu.be/G1ZjQpvnstI)
 
 ## 1. Problema
 
