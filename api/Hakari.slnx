@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Hakari.Api/Hakari.Api.csproj" />
+    <Project Path="src/Hakari.Domain/Hakari.Domain.csproj" />
+    <Project Path="src/Hakari.Infrastructure/Hakari.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Hakari.Tests/Hakari.Tests.csproj" />
+  </Folder>
+</Solution>

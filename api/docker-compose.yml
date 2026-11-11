@@ -1,0 +1,23 @@
+# PostgreSQL para desenvolvimento local. Sobe com: docker compose up -d
+# A senha padrão é só para a máquina local; em outro ambiente defina POSTGRES_PASSWORD.
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: hakari-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hakari
+      POSTGRES_USER: hakari
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hakari_dev}
+    ports:
+      - "5433:5432"
+    volumes:
+      - hakari-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hakari -d hakari"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  hakari-db-data:
