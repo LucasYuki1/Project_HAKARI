@@ -1,0 +1,10 @@
+# Fora da imagem: compilados locais, testes, documentação e a configuração de desenvolvimento
+# (appsettings.Development.json tem a chave JWT e a senha de teste da máquina local).
+**/bin/
+**/obj/
+**/appsettings.Development.json
+tests/
+docs/
+scripts/
+docker-compose.yml
+*.md

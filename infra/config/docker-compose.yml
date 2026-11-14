@@ -1,0 +1,63 @@
+# Orquestração da aplicação no servidor: API .NET + PostgreSQL numa rede interna com IPs fixos.
+# Os valores ${...} vêm de /etc/hakari/hakari.env, gerado por infra/scripts/02_app.sh.
+# Quem liga e desliga é o systemd (hakari-app.service); nenhuma porta é publicada no host:
+# o Nginx alcança a API pelo IP interno, e o banco só é visível para a API.
+name: hakari
+
+x-logs: &logs
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: hakari-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hakari
+      POSTGRES_USER: hakari
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD}
+    volumes:
+      - hakari-db-dados:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hakari -d hakari"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging: *logs
+    networks:
+      hakari:
+        ipv4_address: ${IP_DB:?defina IP_DB}
+
+  api:
+    build:
+      context: ../../api
+    image: hakari-api:latest
+    container_name: hakari-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Hakari: "Host=db;Port=5432;Database=hakari;Username=hakari;Password=${POSTGRES_PASSWORD}"
+      Jwt__Chave: ${JWT_CHAVE:?defina JWT_CHAVE}
+      Seed__SenhaTecnico: ${SENHA_TECNICO:?defina SENHA_TECNICO}
+      Banco__AplicarMigracoes: "true"
+    logging: *logs
+    networks:
+      hakari:
+        ipv4_address: ${IP_API:?defina IP_API}
+
+networks:
+  hakari:
+    name: hakari-net
+    ipam:
+      config:
+        - subnet: ${REDE_SUBNET:?defina REDE_SUBNET}
+          gateway: ${REDE_GATEWAY:?defina REDE_GATEWAY}
+
+volumes:
+  hakari-db-dados:

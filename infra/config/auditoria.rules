@@ -1,0 +1,21 @@
+## Hakari: arquivos sensíveis acompanhados pelo auditd.
+## Instalado por infra/scripts/01_infra.sh em /etc/audit/rules.d/hakari.rules.
+## Consulta: sudo ausearch -k <chave> -i      Resumo: sudo aureport -k --summary
+
+# Segredos e configuração da aplicação (inclusive quem leu)
+-w /etc/hakari/ -p rwa -k hakari_segredos
+
+# Scripts do projeto, executáveis instalados e serviços do systemd
+-w @INFRA@/ -p wa -k hakari_scripts
+-w /usr/local/bin/ -p wa -k hakari_scripts
+-w /etc/systemd/system/ -p wa -k hakari_servicos
+
+# Rede, DNS e firewall
+-w /etc/hosts -p wa -k hakari_rede
+-w /etc/systemd/resolved.conf.d/ -p wa -k hakari_rede
+-w /etc/ufw/ -p wa -k hakari_firewall
+
+# Contas e privilégios
+-w /etc/passwd -p wa -k hakari_contas
+-w /etc/sudoers -p wa -k hakari_contas
+-w /etc/sudoers.d/ -p wa -k hakari_contas

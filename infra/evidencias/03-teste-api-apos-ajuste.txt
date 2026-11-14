@@ -1,0 +1,9 @@
+
+▶ Teste de falha: API fora do ar
+17:44:12 OK    Container hakari-api parado
+17:44:12 INFO  O monitor confere a cada 15 s e religa depois de 2 falhas seguidas
+17:44:12 INFO  Alertas novos em /var/log/hakari/alertas.log (acompanhando por 75 s):
+2026-11-14 17:44:14 [DESASTRE] API: fora do ar (HTTP 504 · api exited · banco running/healthy)
+2026-11-14 17:44:31 [RECUPERACAO] container hakari-api estava 'exited'; iniciando de novo
+2026-11-14 17:44:47 [NORMALIZADO] API: respondendo de novo (HTTP 200)
+17:45:27 OK    hakari-api agora: running

@@ -1,0 +1,10 @@
+# Gerado por infra/scripts/03_monitoramento.sh: rotação diária dos logs do projeto, guardando 14 dias.
+/var/log/hakari/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+}

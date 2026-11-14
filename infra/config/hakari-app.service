@@ -1,0 +1,19 @@
+# Gerado por infra/scripts/02_app.sh a partir de infra/config/hakari-app.service.
+# Liga a API e o banco (docker compose) no boot e desliga de forma ordenada no desligamento.
+[Unit]
+Description=Hakari - API e banco de dados (docker compose)
+Documentation=file://@INFRA@/README.md
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=@INFRA@/config
+ExecStart=/usr/bin/docker compose -p hakari --env-file @AMBIENTE@ -f docker-compose.yml up -d --remove-orphans
+ExecStop=/usr/bin/docker compose -p hakari --env-file @AMBIENTE@ -f docker-compose.yml down
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

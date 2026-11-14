@@ -1,0 +1,25 @@
+# Gerado por infra/scripts/03_monitoramento.sh a partir de infra/config/hakari-monitor.service.
+# O monitor roda como serviço tolerante a falhas:
+#   - se o processo morrer, o systemd reinicia em 5 s (Restart=always);
+#   - se travar e parar de dar sinal de vida, o watchdog mata e reinicia (WatchdogSec);
+#   - se falhar demais em pouco tempo, o systemd para de insistir e registra a falha (StartLimit).
+[Unit]
+Description=Hakari - monitor de CPU, memoria, disco e da aplicacao
+Documentation=file://@INFRA@/README.md
+After=network-online.target hakari-app.service
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=10
+
+[Service]
+Type=notify
+NotifyAccess=all
+ExecStart=/usr/local/bin/hakari-monitor
+Restart=always
+RestartSec=5
+WatchdogSec=45
+TimeoutStopSec=10
+Nice=5
+
+[Install]
+WantedBy=multi-user.target

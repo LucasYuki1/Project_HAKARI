@@ -67,3 +67,20 @@ tela da manutenção no mesmo app, rodando no meu celular pelo Expo Go.
 
 **Minha parte:** definir a jornada a partir das Features, testar o app no celular contra a API, tirar
 os prints e gravar o vídeo.
+
+## Operating Systems
+
+**Pedido:** uma infraestrutura Linux que se provisionasse sozinha por Shell Script para hospedar a
+API do projeto. Pedi para usar uma VM na Azure em vez de VM local, porque o VMware não roda bem no
+meu computador.
+
+**Resultado:** a pasta `infra/`:
+- `provisionar.sh` com três etapas: infraestrutura (hostname, DNS, firewall, swap, auditd),
+  aplicação (Docker, segredos gerados na instalação, docker compose e Nginx) e monitoramento;
+- um monitor de CPU, memória, disco e da API rodando como serviço do systemd, com watchdog e
+  recuperação automática;
+- logs de execução e de auditoria, o painel `status.sh` e os testes de falha;
+- o `Dockerfile` da API.
+
+**Minha parte:** criar e configurar a VM na Azure, rodar o provisionamento e os testes de falha,
+conferir os logs e gravar o vídeo.

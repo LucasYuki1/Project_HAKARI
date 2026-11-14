@@ -1,0 +1,61 @@
+$ systemctl status hakari-app
+● hakari-app.service - Hakari - API e banco de dados (docker compose)
+     Loaded: loaded (/etc/systemd/system/hakari-app.service; enabled; preset: enabled)
+     Active: active (exited) since Sat 2026-11-14 17:43:51 -03; 1min 58s ago
+       Docs: file:///opt/hakari/infra/README.md
+   Main PID: 19078 (code=exited, status=0/SUCCESS)
+        CPU: 115ms
+
+$ systemctl status hakari-monitor
+● hakari-monitor.service - Hakari - monitor de CPU, memoria, disco e da aplicacao
+     Loaded: loaded (/etc/systemd/system/hakari-monitor.service; enabled; preset: enabled)
+     Active: active (running) since Sat 2026-11-14 17:43:56 -03; 1min 52s ago
+       Docs: file:///opt/hakari/infra/README.md
+   Main PID: 19742 (bash)
+     Status: "CPU 3% · memória 18% · disco 25% · API HTTP 200"
+      Tasks: 2 (limit: 3913)
+     Memory: 988.0K (peak: 9.6M)
+        CPU: 586ms
+
+$ systemctl status nginx
+● nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)
+     Active: active (running) since Sat 2026-11-14 17:31:05 -03; 14min ago
+       Docs: man:nginx(8)
+   Main PID: 7996 (nginx)
+      Tasks: 3 (limit: 3913)
+     Memory: 3.5M (peak: 5.4M swap: 552.0K swap peak: 1.0M)
+        CPU: 77ms
+     CGroup: /system.slice/nginx.service
+
+$ systemctl status docker
+● docker.service - Docker Application Container Engine
+     Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled; preset: enabled)
+     Active: active (running) since Sat 2026-11-14 17:31:08 -03; 14min ago
+TriggeredBy: ● docker.socket
+       Docs: https://docs.docker.com
+   Main PID: 8037 (dockerd)
+      Tasks: 10
+     Memory: 147.9M (peak: 187.5M swap: 6.3M swap peak: 6.3M)
+        CPU: 5.252s
+
+$ systemctl status auditd
+● auditd.service - Security Auditing Service
+     Loaded: loaded (/usr/lib/systemd/system/auditd.service; enabled; preset: enabled)
+     Active: active (running) since Sat 2026-11-14 17:30:49 -03; 15min ago
+       Docs: man:auditd(8)
+             https://github.com/linux-audit/audit-documentation
+   Main PID: 6872 (auditd)
+      Tasks: 2 (limit: 3913)
+     Memory: 1.6M (peak: 2.6M)
+        CPU: 255ms
+
+$ journalctl -u hakari-monitor (reinícios e watchdog)
+Nov 14 17:33:06 hakari-srv hakari-monitor[12623]: monitor iniciado (pid 12618, reinícios pelo systemd: 0)
+Nov 14 17:34:49 hakari-srv systemd[1]: hakari-monitor.service: Failed with result 'signal'.
+Nov 14 17:34:54 hakari-srv systemd[1]: hakari-monitor.service: Scheduled restart job, restart counter is at 1.
+Nov 14 17:34:54 hakari-srv hakari-monitor[13960]: monitor iniciado (pid 13955, reinícios pelo systemd: 1)
+Nov 14 17:42:38 hakari-srv systemd[1]: hakari-monitor.service: Failed with result 'watchdog'.
+Nov 14 17:42:44 hakari-srv systemd[1]: hakari-monitor.service: Scheduled restart job, restart counter is at 2.
+Nov 14 17:42:44 hakari-srv hakari-monitor[16516]: monitor iniciado (pid 16511, reinícios pelo systemd: 2)
+Nov 14 17:43:56 hakari-srv hakari-monitor[19747]: monitor iniciado (pid 19742, reinícios pelo systemd: 0)

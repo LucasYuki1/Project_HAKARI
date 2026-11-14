@@ -1,0 +1,86 @@
+$ hostnamectl
+ Static hostname: hakari-srv
+       Icon name: computer-vm
+         Chassis: vm 🖴
+      Machine ID: 1b180fa002bb47c7a600df63b77c0dc0
+         Boot ID: 962fabfd9d734c8aa00f70a9c726fd6a
+  Virtualization: microsoft
+Operating System: Ubuntu 24.04.5 LTS
+          Kernel: Linux 7.0.0-1017-azure
+
+$ cat /etc/hosts
+127.0.0.1 localhost
+
+# The following lines are desirable for IPv6 capable hosts
+::1 ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
+# >>> HAKARI: gerenciado por infra/scripts >>>
+127.0.1.1 hakari-srv.hakari.internal hakari-srv
+172.28.0.10 api.hakari.internal
+172.28.0.20 db.hakari.internal
+# <<< HAKARI <<<
+
+$ resolvectl status
+Global
+           Protocols: -LLMNR -mDNS -DNSOverTLS DNSSEC=no/unsupported
+    resolv.conf mode: stub
+  Current DNS Server: 1.1.1.1
+         DNS Servers: 1.1.1.1 8.8.8.8
+Fallback DNS Servers: 9.9.9.9
+          DNS Domain: hakari.internal
+
+Link 2 (eth0)
+    Current Scopes: DNS
+         Protocols: +DefaultRoute -LLMNR -mDNS -DNSOverTLS DNSSEC=no/unsupported
+Current DNS Server: 168.63.129.16
+       DNS Servers: 168.63.129.16
+        DNS Domain: jzoz2e0lxr0evonjr0stpxvxhc.jx.internal.cloudapp.net
+
+Link 3 (enP36516s1)
+    Current Scopes: none
+         Protocols: -DefaultRoute -LLMNR -mDNS -DNSOverTLS DNSSEC=no/unsupported
+
+Link 4 (docker0)
+
+$ ip -4 addr show eth0 / ip route
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+    inet 172.16.0.4/24 metric 100 brd 172.16.0.255 scope global eth0
+       valid_lft forever preferred_lft forever
+default via 172.16.0.1 dev eth0 proto dhcp src 172.16.0.4 metric 100 
+168.63.129.16 via 172.16.0.1 dev eth0 proto dhcp src 172.16.0.4 metric 100 
+169.254.169.254 via 172.16.0.1 dev eth0 proto dhcp src 172.16.0.4 metric 100 
+172.16.0.0/24 dev eth0 proto kernel scope link src 172.16.0.4 metric 100 
+172.16.0.1 dev eth0 proto dhcp scope link src 172.16.0.4 metric 100 
+172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown 
+172.28.0.0/24 dev br-43d017286218 proto kernel scope link src 172.28.0.1 
+
+$ sudo ufw status verbose
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), deny (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW IN    Anywhere                  
+80/tcp                     ALLOW IN    Anywhere                  
+22/tcp (v6)                ALLOW IN    Anywhere (v6)             
+80/tcp (v6)                ALLOW IN    Anywhere (v6)             
+
+
+$ docker network inspect hakari-net (IPAM e containers)
+[{"Subnet":"172.28.0.0/24","IPRange":"","Gateway":"172.28.0.1"}] hakari-api=172.28.0.10/24 hakari-db=172.28.0.20/24 
+
+$ sysctl (ajustes de rede)
+net.ipv4.tcp_syncookies = 1
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
+vm.swappiness = 10
+
+$ swapon --show
+NAME      TYPE SIZE  USED PRIO
+/swapfile file   2G 74.4M   -1

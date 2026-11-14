@@ -1,0 +1,65 @@
+
+Servidor
+  Hostname                 hakari-srv.hakari.internal
+  Sistema                  Ubuntu 24.04.5 LTS · kernel 7.0.0-1017-azure
+  Ligado há                25 minutes
+  Fuso horário             America/Sao_Paulo · 14/11/2026 17:45
+
+Rede
+  IP privado               172.16.0.4/24 (eth0)
+  IP público               40.124.106.65
+  DNS                      1.1.1.1 8.8.8.8 168.63.129.16 
+  Domínio de busca         hakari.internal jzoz2e0lxr0evonjr0stpxvxhc.jx.internal.cloudapp.net 
+  Nomes internos           api.hakari.internal → 172.28.0.10   db.hakari.internal → 172.28.0.20   
+  Firewall (ufw)           active · entrada liberada: 22/tcp 80/tcp 
+  Rede dos containers      172.28.0.0/24
+
+Serviços
+  docker                   active · enabled no boot
+  nginx                    active · enabled no boot
+  auditd                   active · enabled no boot
+  hakari-app               active · enabled no boot
+  hakari-monitor           active · enabled no boot
+  Monitor agora            CPU 0% · memória 18% · disco 25% · API HTTP 200
+  Reinícios do monitor     0
+
+Containers
+  hakari-api               running · IP 172.28.0.10 · reinícios 0
+  hakari-db                running/healthy · IP 172.28.0.20 · reinícios 0
+
+Aplicação
+  Saúde (pelo Nginx)       HTTP 200
+  Endereço público         http://40.124.106.65/swagger
+
+Recursos
+  CPU (carga 1/5/15 min)   0.16 0.40 0.35 · 2 vCPU
+  Memória                  726Mi usados de 3.8Gi
+  Swap                     74Mi usados de 2.0Gi
+  Disco /                  6.9G usados de 29G (25%)
+
+Últimos alertas (/var/log/hakari/alertas.log)
+  2026-11-14 17:40:38 [ALTA] Disco: uso de 89% em / (limite 85%)
+  2026-11-14 17:41:38 [NORMALIZADO] Disco: uso de 25% em / (limite 85%)
+  2026-11-14 17:43:48 [DESASTRE] API: fora do ar (HTTP 502 · api created · banco running/starting)
+  2026-11-14 17:44:14 [DESASTRE] API: fora do ar (HTTP 504 · api exited · banco running/healthy)
+  2026-11-14 17:44:31 [RECUPERACAO] container hakari-api estava 'exited'; iniciando de novo
+  2026-11-14 17:44:47 [NORMALIZADO] API: respondendo de novo (HTTP 200)
+
+Últimas execuções dos scripts (/var/log/hakari/auditoria.log)
+  2026-11-14 17:43:55 | fim    | script=02_app.sh | resultado=sucesso | codigo=0 | duracao=21s
+  2026-11-14 17:43:55 | inicio | script=03_monitoramento.sh | usuario=azureuser | args=nenhum | host=hakari-srv
+  2026-11-14 17:44:00 | fim    | script=03_monitoramento.sh | resultado=sucesso | codigo=0 | duracao=5s
+  2026-11-14 17:44:01 | fim    | script=provisionar.sh | resultado=sucesso | codigo=0 | duracao=35s
+  2026-11-14 17:44:12 | inicio | script=teste_falha.sh | usuario=azureuser | args=api | host=hakari-srv
+  2026-11-14 17:45:27 | fim    | script=teste_falha.sh | resultado=sucesso | codigo=0 | duracao=75s
+
+Auditoria do sistema (auditd, eventos por chave)
+  hakari_scripts           335 eventos
+  hakari_docker            147 eventos
+  hakari_segredos          83 eventos
+  hakari_firewall          72 eventos
+  hakari_contas            35 eventos
+  hakari_rede              28 eventos
+  hakari_web               22 eventos
+  hakari_servicos          21 eventos
+

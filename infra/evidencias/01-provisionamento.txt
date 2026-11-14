@@ -1,0 +1,151 @@
+
+▶ Pacotes base
+17:43:29 OK    Lista de pacotes atualizada
+17:43:29 OK    Ferramentas instaladas: curl, git, jq, ufw, auditd, dig, stress-ng
+
+▶ Identidade da máquina
+17:43:29 OK    /etc/hosts: hakari-srv.hakari.internal, api.hakari.internal (172.28.0.10) e db.hakari.internal (172.28.0.20)
+17:43:29 OK    Hostname: hakari-srv
+17:43:29 OK    cloud-init orientado a manter o hostname e o /etc/hosts
+17:43:29 OK    Fuso horário: America/Sao_Paulo
+17:43:29 OK    Sincronização de horário (NTP) ligada
+
+▶ DNS
+17:43:29 OK    systemd-resolved usando 1.1.1.1 8.8.8.8 (reserva 9.9.9.9)
+17:43:31 OK    Nome externo resolvido (github.com)
+17:43:31 OK    Nome interno resolvido (api.hakari.internal → 172.28.0.10)
+
+▶ Rede e IP
+17:43:31 OK    Interface eth0 · IP privado 172.16.0.4/24 · gateway 172.16.0.1 · IP público 40.124.106.65
+17:43:31 INFO  O IP da placa vem da Azure (DHCP) e não é alterado aqui: trocá-lo derrubaria o acesso SSH.
+17:43:31 INFO  Rede interna dos containers: 172.28.0.0/24 (API 172.28.0.10, banco 172.28.0.20), criada na etapa app.
+17:43:31 OK    Parâmetros de rede do kernel aplicados
+
+▶ Firewall (ufw)
+17:43:32 OK    Entrada bloqueada por padrão
+17:43:33 OK    Saída liberada por padrão
+17:43:33 OK    Porta 22/tcp liberada
+17:43:33 OK    Porta 80/tcp liberada
+17:43:33 OK    Conexões bloqueadas registradas em /var/log/ufw.log
+17:43:33 OK    Firewall ativo
+
+▶ Memória swap
+17:43:33 OK    Swap de 2048 MB já estava ativo
+
+▶ Auditoria do sistema (auditd)
+17:43:34 OK    auditd ativo e ligado no boot
+17:43:34 OK    Regras de auditoria carregadas
+17:43:34 OK    Eventos em /var/log/audit/audit.log · consulta: sudo ausearch -k hakari_rede -i
+17:43:34 OK    Infraestrutura pronta
+
+▶ Dependências
+17:43:35 OK    Docker, Docker Compose e Nginx instalados
+17:43:35 OK    Docker Buildx instalado
+17:43:35 OK    Docker ativo e ligado no boot
+17:43:35 OK    Docker version 29.1.3 · Compose 2.40.3+ds1-0ubuntu1~24.04.1
+17:43:35 OK    Auditoria do Docker e do Nginx carregada
+
+▶ Variáveis e segredos
+17:43:35 OK    Senhas já existentes mantidas (o banco continua abrindo com a mesma senha)
+17:43:35 OK    Variáveis em /etc/hakari/hakari.env (permissão 600: só o root lê)
+
+▶ Imagens
+17:43:36 OK    Imagem do PostgreSQL 16 baixada
+17:43:36 INFO  Compilando a API .NET dentro do Docker (na primeira vez leva alguns minutos)...
+17:43:37 OK    Imagem hakari-api construída
+
+▶ Serviço da aplicação (systemd)
+17:43:37 OK    Unidade hakari-app.service instalada
+17:43:38 OK    hakari-app ligado no boot
+17:43:51 OK    API e banco iniciados (docker compose up)
+
+▶ Conferindo a aplicação
+17:43:54 OK    Containers: hakari-api (Up 3 seconds); hakari-db (Up 13 seconds (healthy))
+17:43:54 OK    API saudável em http://api.hakari.internal:8080 (rede interna)
+
+▶ Nginx na porta 80
+17:43:54 OK    Configuração do Nginx válida
+17:43:55 OK    Nginx ligado no boot
+17:43:55 OK    Nginx recarregado
+17:43:55 OK    Aplicação respondendo pela porta 80
+17:43:55 OK    Aplicação publicada: http://40.124.106.65/swagger
+
+▶ Monitor de recursos e da aplicação
+17:43:55 OK    Configuração copiada para /etc/hakari/hakari.conf
+17:43:55 OK    Monitor instalado em /usr/local/bin/hakari-monitor
+17:43:56 OK    Unidade hakari-monitor.service instalada
+17:43:56 OK    Monitor ligado no boot
+17:43:56 OK    Monitor iniciado
+17:44:00 OK    Monitor ativo: CPU 1% · memória 18% · disco 25% · API HTTP 200
+17:44:00 INFO  Limites: CPU 85% · memória 85% · disco 85% · Desastre a partir de 95% · checagem a cada 15s
+
+▶ Rotação de logs
+17:44:00 OK    Rotação diária instalada (guarda 14 dias, comprimidos)
+17:44:00 OK    Regra de rotação válida
+17:44:00 OK    Monitoramento pronto. Logs em /var/log/hakari
+
+Servidor
+  Hostname                 hakari-srv.hakari.internal
+  Sistema                  Ubuntu 24.04.5 LTS · kernel 7.0.0-1017-azure
+  Ligado há                23 minutes
+  Fuso horário             America/Sao_Paulo · 14/11/2026 17:44
+
+Rede
+  IP privado               172.16.0.4/24 (eth0)
+  IP público               40.124.106.65
+  DNS                      1.1.1.1 8.8.8.8 168.63.129.16 
+  Domínio de busca         hakari.internal jzoz2e0lxr0evonjr0stpxvxhc.jx.internal.cloudapp.net 
+  Nomes internos           api.hakari.internal → 172.28.0.10   db.hakari.internal → 172.28.0.20   
+  Firewall (ufw)           active · entrada liberada: 22/tcp 80/tcp 
+  Rede dos containers      172.28.0.0/24
+
+Serviços
+  docker                   active · enabled no boot
+  nginx                    active · enabled no boot
+  auditd                   active · enabled no boot
+  hakari-app               active · enabled no boot
+  hakari-monitor           active · enabled no boot
+  Monitor agora            CPU 1% · memória 18% · disco 25% · API HTTP 200
+  Reinícios do monitor     0
+
+Containers
+  hakari-api               running · IP 172.28.0.10 · reinícios 0
+  hakari-db                running/healthy · IP 172.28.0.20 · reinícios 0
+
+Aplicação
+  Saúde (pelo Nginx)       HTTP 200
+  Endereço público         http://40.124.106.65/swagger
+
+Recursos
+  CPU (carga 1/5/15 min)   0.44 0.51 0.39 · 2 vCPU
+  Memória                  709Mi usados de 3.8Gi
+  Swap                     74Mi usados de 2.0Gi
+  Disco /                  6.9G usados de 29G (25%)
+
+Últimos alertas (/var/log/hakari/alertas.log)
+  2026-11-14 17:38:37 [NORMALIZADO] CPU: uso de 20% (limite 85%)
+  2026-11-14 17:39:07 [ALTA] Memória: uso de 89% (limite 85%)
+  2026-11-14 17:40:08 [NORMALIZADO] Memória: uso de 15% (limite 85%)
+  2026-11-14 17:40:38 [ALTA] Disco: uso de 89% em / (limite 85%)
+  2026-11-14 17:41:38 [NORMALIZADO] Disco: uso de 25% em / (limite 85%)
+  2026-11-14 17:43:48 [DESASTRE] API: fora do ar (HTTP 502 · api created · banco running/starting)
+
+Últimas execuções dos scripts (/var/log/hakari/auditoria.log)
+  2026-11-14 17:43:26 | inicio | script=01_infra.sh | usuario=azureuser | args=nenhum | host=hakari-srv
+  2026-11-14 17:43:34 | fim    | script=01_infra.sh | resultado=sucesso | codigo=0 | duracao=8s
+  2026-11-14 17:43:34 | inicio | script=02_app.sh | usuario=azureuser | args=nenhum | host=hakari-srv
+  2026-11-14 17:43:55 | fim    | script=02_app.sh | resultado=sucesso | codigo=0 | duracao=21s
+  2026-11-14 17:43:55 | inicio | script=03_monitoramento.sh | usuario=azureuser | args=nenhum | host=hakari-srv
+  2026-11-14 17:44:00 | fim    | script=03_monitoramento.sh | resultado=sucesso | codigo=0 | duracao=5s
+
+Auditoria do sistema (auditd, eventos por chave)
+  hakari_scripts           335 eventos
+  hakari_docker            125 eventos
+  hakari_segredos          83 eventos
+  hakari_firewall          72 eventos
+  hakari_contas            35 eventos
+  hakari_rede              28 eventos
+  hakari_web               22 eventos
+  hakari_servicos          21 eventos
+
+codigo de saida: 0

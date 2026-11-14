@@ -1,0 +1,39 @@
+$ sudo aureport -k --summary   (eventos por regra do Hakari)
+  hakari_scripts     335 eventos
+  hakari_docker      152 eventos
+  hakari_segredos    92 eventos
+  hakari_firewall    72 eventos
+  hakari_contas      35 eventos
+  hakari_rede        28 eventos
+  hakari_web         22 eventos
+  hakari_servicos    21 eventos
+
+$ sudo ausearch -k hakari_segredos --format text   (acessos e alterações mais recentes)
+At 17:43:55 11/14/26 azureuser, acting as root, successfully changed-file-attributes-of /home/azureuser/(null) using /usr/bin/install
+At 17:43:55 11/14/26 azureuser, acting as root, successfully changed-file-permissions-of /etc/hakari/hakari.conf to 0600 using /usr/bin/install
+At 17:43:56 11/14/26 system, acting as root, successfully opened-file /etc/hakari/hakari.conf using bash
+At 17:45:53 11/14/26 azureuser, acting as root, successfully opened-file /etc/hakari using /usr/bin/ls
+
+$ sudo ausearch -k hakari_rede --format text   (acessos e alterações mais recentes)
+At 17:32:41 11/14/26 azureuser, acting as root, successfully opened-file /etc/systemd/resolved.conf.d/90-hakari.conf using bash
+At 17:43:29 11/14/26 azureuser, acting as root, successfully opened-file /etc/hosts using /usr/bin/touch
+At 17:43:29 11/14/26 azureuser, acting as root, successfully opened-file /etc/hosts using bash
+At 17:43:29 11/14/26 azureuser, acting as root, successfully opened-file /etc/systemd/resolved.conf.d/90-hakari.conf using bash
+
+$ sudo ausearch -k hakari_servicos --format text   (acessos e alterações mais recentes)
+At 17:32:49 11/14/26 azureuser, acting as root, successfully opened-file /etc/systemd/system/hakari-app.service using bash
+At 17:33:06 11/14/26 azureuser, acting as root, successfully opened-file /etc/systemd/system/hakari-monitor.service using bash
+At 17:43:37 11/14/26 azureuser, acting as root, successfully opened-file /etc/systemd/system/hakari-app.service using bash
+At 17:43:55 11/14/26 azureuser, acting as root, successfully opened-file /etc/systemd/system/hakari-monitor.service using bash
+
+$ sudo ausearch -k hakari_firewall --format text   (acessos e alterações mais recentes)
+At 17:43:33 11/14/26 azureuser, acting as root, successfully opened-file /etc/ufw/user.rules using ufw
+At 17:43:33 11/14/26 azureuser, acting as root, successfully changed-file-permissions-of /etc/ufw/user.rules to 0640 using ufw
+At 17:43:33 11/14/26 azureuser, acting as root, successfully opened-file /etc/ufw/user6.rules using ufw
+At 17:43:33 11/14/26 azureuser, acting as root, successfully changed-file-permissions-of /etc/ufw/user6.rules to 0640 using ufw
+
+$ sudo ausearch -k hakari_docker --format text   (acessos e alterações mais recentes)
+At 17:46:02 11/14/26 system, acting as root, successfully executed /usr/bin/docker 
+At 17:46:02 11/14/26 system, acting as root, successfully executed /usr/bin/docker 
+At 17:46:17 11/14/26 system, acting as root, successfully executed /usr/bin/docker 
+At 17:46:17 11/14/26 system, acting as root, successfully executed /usr/bin/docker 
