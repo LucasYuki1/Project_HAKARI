@@ -154,6 +154,21 @@ sudo bash /opt/hakari/infra/scripts/teste_falha.sh <teste>
 
 Cada teste também entra no `auditoria.log`.
 
+## Refazer do zero
+
+O `desfazer.sh` devolve a VM ao estado de antes do provisionamento:
+- remove a aplicação, o banco e as imagens;
+- desinstala Docker, Nginx, auditd e stress-ng;
+- desfaz o hostname, o `/etc/hosts`, o DNS, o firewall, o swap e o fuso;
+- apaga `/opt/hakari` e os logs.
+
+Ele pede confirmação antes. Serve para repetir a demonstração sem recriar a VM:
+
+```bash
+sudo bash /opt/hakari/infra/scripts/desfazer.sh
+sudo reboot
+```
+
 ## Evidências
 
 As saídas reais da VM na Azure (provisionamento completo, os sete testes de falha, painel, serviços,
@@ -173,7 +188,8 @@ infra/
     monitorar.sh            o monitor (vira /usr/local/bin/hakari-monitor)
     status.sh               painel do servidor
     teste_falha.sh          testes de falha
-  evidencias/              saídas reais da VM: provisionamento, testes de falha, logs
+    desfazer.sh             volta a VM ao estado de antes do provisionamento
+  evidencias/               saídas reais da VM: provisionamento, testes de falha, logs
   config/
     docker-compose.yml      API + PostgreSQL com IPs fixos
     nginx-hakari.conf       proxy da porta 80 para a API

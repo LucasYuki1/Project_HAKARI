@@ -88,14 +88,28 @@ finalizar_auditoria() {
   logger -t hakari-auditoria "$registro"
 }
 
-# Grava (ou substitui) um bloco marcado dentro de um arquivo sem mexer no resto dele.
-# Rodar de novo troca o bloco em vez de duplicar.
+# Blocos gerenciados: trechos marcados que os scripts gravam dentro de arquivos do sistema
+# (ex.: /etc/hosts) sem mexer no resto do arquivo.
+MARCA_INICIO="# >>> HAKARI: gerenciado por infra/scripts >>>"
+MARCA_FIM="# <<< HAKARI <<<"
+
+sem_bloco() {   # imprime o arquivo sem o bloco do Hakari
+  awk -v i="$MARCA_INICIO" -v f="$MARCA_FIM" '$0==i{pula=1; next} $0==f{pula=0; next} !pula' "$1"
+}
+
+# Grava (ou substitui) o bloco. Rodar de novo troca o bloco em vez de duplicar.
 bloco_gerenciado() {
   local arquivo="$1" conteudo="$2" resto
-  local inicio="# >>> HAKARI: gerenciado por infra/scripts >>>" fim="# <<< HAKARI <<<"
   touch "$arquivo"
-  resto="$(awk -v i="$inicio" -v f="$fim" '$0==i{pula=1; next} $0==f{pula=0; next} !pula' "$arquivo")"
-  printf '%s\n%s\n%s\n%s\n' "$resto" "$inicio" "$conteudo" "$fim" > "$arquivo"
+  resto="$(sem_bloco "$arquivo")"
+  printf '%s\n%s\n%s\n%s\n' "$resto" "$MARCA_INICIO" "$conteudo" "$MARCA_FIM" > "$arquivo"
+}
+
+remover_bloco() {
+  local arquivo="$1" resto
+  [ -f "$arquivo" ] || return 0
+  resto="$(sem_bloco "$arquivo")"
+  printf '%s\n' "$resto" > "$arquivo"
 }
 
 ip_publico() { curl -s --max-time 5 https://api.ipify.org 2>/dev/null || true; }
