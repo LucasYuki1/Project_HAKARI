@@ -1,0 +1,71 @@
+# seguranca/.venv/Scripts/python seguranca/auditar.py --rotulo depois
+# 15/11/2026 14:19 · commit 4470f4f (com alterações ainda não commitadas) · Semgrep 1.183.0 · IA claude-opus-5-5
+
+RISCO CIDADÃO: 6,5 de 100 (Baixo)
+  Contribuição por tipo de dado: Credencial 4,7; Contato 1,8
+  Fórmula: 100 × (1 − Π(1 − p)), p = 0,3 × sensibilidade × exposição × gravidade
+
+VARREDURA: 139 arquivos, 23 regras. Dados pessoais mapeados: 36 campos.
+ACHADOS: 0 abertos, 2 aceitos
+
+  [ACEITO · WARNING] Senha padrão publicada no repositório
+    hakari.segredo.senha-padrao · api/docker-compose.yml:11 · Art. 46 (segurança)
+    Alerta ao cidadão (claude-opus-5-5, nível baixo): Senha de teste do banco aparece no código publicado
+      O código do Hakari, publicado na internet, traz uma senha padrão para o banco de dados usado
+      só nos computadores da equipe durante o desenvolvimento. Esse banco de teste não tem dados
+      reais de cidadãos e só aceita conexões do próprio computador onde roda. No servidor de
+      verdade, a senha do banco é outra, criada de forma aleatória e guardada fora do código, por
+      isso o risco ficou baixo.
+    Correção sugerida:
+      Risco aceito e mitigado: a porta está presa a 127.0.0.1 e a produção usa senha aleatória em
+      /etc/hakari/hakari.env. Para eliminar o padrão de vez, troque o fallback por uma exigência
+      explícita no api/docker-compose.yml (linha 11), fazendo o compose falhar se POSTGRES_PASSWORD
+      não estiver definida, e documente a variável num .env.example sem valor. Isso evita que alguém
+      reutilize o arquivo em outro ambiente e suba o banco com a senha publicada.
+    Por que foi aceito:
+      A senha padrão é do PostgreSQL de desenvolvimento local, sem dado real. Desde esta auditoria o
+      container só aceita conexões da própria máquina (127.0.0.1:5433). No servidor, a senha do
+      banco é gerada aleatoriamente pelo infra/scripts/02_app.sh e fica em /etc/hakari/hakari.env.
+
+  [ACEITO · WARNING] Cadastro confirma se um e-mail já usa o Hakari
+    revisao-manual.enumeracao-de-email · api/src/Hakari.Api/Aplicacao/AuthService.cs:28 · Art. 46 (segurança)
+    Alerta ao cidadão (claude-opus-5-5, nível baixo): Cadastro revela se um e-mail já tem conta no Hakari
+      Quando alguém tenta criar uma conta com um e-mail que já está cadastrado, o app avisa que esse
+      e-mail já está em uso. Com isso, uma pessoa que conheça o seu e-mail consegue descobrir se
+      você usa o Hakari, mas não vê seu nome, telefone, senha nem suas ocorrências. A equipe
+      considerou o risco baixo, porque usar um app de iluminação pública revela pouco sobre a sua
+      vida, e planeja limitar o número de tentativas de cadastro para dificultar testes em massa.
+    Correção sugerida:
+      O risco foi aceito, mas a mitigação precisa sair do papel: aplicar rate limiting por IP no
+      Nginx (limit_req) e na API (Microsoft.AspNetCore.RateLimiting) no endpoint de cadastro. Como
+      melhoria, o AuthService.cs (linha 28) pode responder sempre com a mesma mensagem genérica e
+      enviar ao e-mail informado um aviso de que já existe conta, igualando o comportamento ao do
+      login. Registre a decisão e reavalie se o cadastro passar a coletar dados mais sensíveis.
+    Por que foi aceito:
+      A mensagem ajuda quem esqueceu que já tem conta, e saber que alguém usa um app de iluminação
+      pública expõe pouco. Mitigação planejada: limitar tentativas de cadastro por IP no Nginx e na
+      API.
+
+TESTE DE CANÁRIOS: 9 saídas verificadas, 0 vazamentos
+  resposta de POST /api/postes/{id}/reportes (autora)                    nenhum dado vazou
+  GET /api/ocorrencias/{id} (outro cidadão)                              nenhum dado vazou
+  GET /api/manutencao/fila (técnico)                                     nenhum dado vazou
+  resposta de POST /api/ocorrencias/{id}/resolver (técnico)              nenhum dado vazou
+  GET /api/ocorrencias/{id} (resolvida) (outro cidadão)                  nenhum dado vazou
+  GET /api/ocorrencias/minhas (autora)                                   nenhum dado vazou
+  banco: ocorrencias.descricao (quem acessa o banco)                     nenhum dado vazou
+  banco: ocorrencias.solucao (quem acessa o banco)                       nenhum dado vazou
+  banco: historico_ocorrencias (quem acessa o banco)                     nenhum dado vazou
+
+MOTOR DE PII: 76 casos, precisão 100%, cobertura 100%, F1 100%
+TESTES DE PRIVACIDADE: 34/34 aprovados
+IA: 3 chamada(s), 0 do cache, 5465 tokens de entrada, 3070 de saída, cerca de US$ 0,08
+
+RESUMO EXECUTIVO (claude-opus-5-5): Hakari chega a risco baixo (6,5 de 100) para o cidadão, sem nenhuma falha de privacidade em aberto
+  A auditoria mais recente do Hakari mediu risco de 6,5 em 100 para o cidadão, classificado como
+  baixo, e não encontrou nenhuma falha em aberto. Restam dois riscos pequenos, aceitos de forma
+  consciente pela equipe e justificados: uma senha de testes que aparece no código publicado na
+  internet e uma mensagem do cadastro que confirma se um e-mail já tem conta. Um teste com dados
+  fictícios verificou 9 pontos onde o sistema devolve informações e não encontrou nenhum vazamento.
+  A ferramenta que localiza dados pessoais acertou todos os 76 casos de teste e mapeou 36 campos de
+  dados pessoais no código, o que dá confiança ao resultado.

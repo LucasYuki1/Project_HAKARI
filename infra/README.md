@@ -1,7 +1,7 @@
 # Hakari: servidor Linux provisionado por Shell Script
 
 **Operating Systems · Global Solution 2026/2 · CitizenTech**
-**Aluno:** Lucas Yuki (RM 554865) · **Vídeo:** _link do vídeo_
+**Aluno:** Lucas Yuki (RM 554865) · **Vídeo:** [youtu.be/cPQ85GJY4b0](https://youtu.be/cPQ85GJY4b0)
 
 Um comando prepara uma VM Ubuntu na Azure, do zero, para hospedar a aplicação web do Hakari: a API
 em C#/.NET (com o Swagger) e o banco PostgreSQL. O mesmo comando configura rede, DNS, firewall,
@@ -46,7 +46,8 @@ logs:    /var/log/hakari/  ·  auditd  ·  journalctl
 | Item | Valor |
 |---|---|
 | Imagem | Ubuntu Server 24.04 LTS |
-| Tamanho | Standard_B2s (2 vCPU, 4 GB de RAM) |
+| Tamanho | Standard D2als v6 (2 vCPU, 4 GB de RAM) |
+| Região | South Central US |
 | Acesso | Chave SSH, usuário `azureuser` |
 | Portas abertas no grupo de segurança | 22 (SSH) e 80 (HTTP) |
 | Nome DNS público | Rótulo `hakari-gs` no IP público |

@@ -1,5 +1,6 @@
 using Hakari.Domain.Enums;
 using Hakari.Domain.Excecoes;
+using Hakari.Domain.Privacidade;
 
 namespace Hakari.Domain.Entidades;
 
@@ -7,6 +8,8 @@ namespace Hakari.Domain.Entidades;
 /// Chamado de manutenção de um poste. Nasce de um alerta (origem Automática) ou de um reporte
 /// (origem Cidadão). O status só muda pelos métodos abaixo, que aplicam o ciclo
 /// Aberta → Em atendimento → Resolvida e registram cada passo no histórico.
+/// A descrição do cidadão e a solução do técnico são lidas por outras pessoas, então só entram como
+/// <see cref="TextoSeguro"/>: texto que já passou pelo motor de PII (o compilador não aceita string).
 /// </summary>
 public class Ocorrencia : Entidade
 {
@@ -70,11 +73,11 @@ public class Ocorrencia : Entidade
     }
 
     public static Ocorrencia AbrirPorCidadao(Poste poste, Cidadao autor, CategoriaProblema categoria,
-                                             string descricao, DateTime agora)
+                                             TextoSeguro descricao, DateTime agora)
     {
-        ValidarDescricao(descricao);
+        ValidarDescricao(descricao.Texto);
         return new Ocorrencia(poste, OrigemOcorrencia.Cidadao, Severidade.Alta, categoria,
-                              descricao.Trim(), agora) { Autor = autor };
+                              descricao.Texto, agora) { Autor = autor };
     }
 
     public static void ValidarDescricao(string? descricao)
@@ -97,7 +100,7 @@ public class Ocorrencia : Entidade
         Registrar($"Assumida por {tecnico.NomeAbreviado()}", agora);
     }
 
-    public void Resolver(Tecnico tecnico, string solucao, DateTime agora)
+    public void Resolver(Tecnico tecnico, TextoSeguro solucao, DateTime agora)
     {
         if (Status == StatusOcorrencia.Aberta)
             throw new RegraDeNegocioException("Assuma a ocorrência antes de resolvê-la");
@@ -105,11 +108,11 @@ public class Ocorrencia : Entidade
             throw new RegraDeNegocioException("Esta ocorrência já foi resolvida");
         if (!tecnico.Mesma(Responsavel) && ResponsavelId != tecnico.Id)
             throw new RegraDeNegocioException("Só o técnico responsável pode resolver esta ocorrência");
-        if (string.IsNullOrWhiteSpace(solucao))
+        if (string.IsNullOrWhiteSpace(solucao.Texto))
             throw new ValidacaoException("Informe o que foi feito");
 
         Status = StatusOcorrencia.Resolvida;
-        Solucao = solucao.Trim();
+        Solucao = solucao.Texto;
         ResolvidaEm = agora;
         Registrar($"Resolvida: {Solucao}", agora);
     }

@@ -1,0 +1,38 @@
+# Registro de riscos aceitos e de achados da revisão manual.
+#
+# Um risco aceito continua no painel e no Risco Cidadão, com 25% do peso (risco residual). Cada
+# aceite tem justificativa, responsável e data para ser revisto; vencida a data, o achado volta a
+# contar como aberto.
+
+[[risco]]
+regra = "hakari.segredo.senha-padrao"
+arquivo = "api/docker-compose.yml"
+justificativa = """A senha padrão é do PostgreSQL de desenvolvimento local, sem dado real. Desde esta \
+auditoria o container só aceita conexões da própria máquina (127.0.0.1:5433). No servidor, a senha \
+do banco é gerada aleatoriamente pelo infra/scripts/02_app.sh e fica em /etc/hakari/hakari.env."""
+responsavel = "Lucas Yuki"
+aceito_em = 2026-11-14
+revisar_em = 2027-05-14
+
+# Achados que nenhuma regra automática pega, vindos da revisão manual do código.
+
+[[achado_manual]]
+id = "enumeracao-de-email"
+titulo = "Cadastro confirma se um e-mail já usa o Hakari"
+severidade = "WARNING"
+categoria = "contato"
+saida = "respostas-de-erro"
+arquivo = "api/src/Hakari.Api/Aplicacao/AuthService.cs"
+linha = 28
+mensagem = """Ao cadastrar um e-mail já usado, a API responde "Este e-mail já está em uso". Com isso, \
+alguém consegue testar se uma pessoa específica usa o app. O login já responde igual para e-mail \
+inexistente e senha errada; o cadastro não."""
+lgpd = "Art. 46 (segurança)"
+cwe = "CWE-204: Observable Response Discrepancy"
+status = "aceito"
+justificativa = """A mensagem ajuda quem esqueceu que já tem conta, e saber que alguém usa um app de \
+iluminação pública expõe pouco. Mitigação planejada: limitar tentativas de cadastro por IP no Nginx \
+e na API."""
+responsavel = "Lucas Yuki"
+aceito_em = 2026-11-14
+revisar_em = 2027-02-14

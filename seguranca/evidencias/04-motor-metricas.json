@@ -1,0 +1,142 @@
+{
+  "casos": 76,
+  "com_dado_pessoal": 46,
+  "sem_dado_pessoal": 30,
+  "acertos": 50,
+  "falsos_positivos": 0,
+  "falsos_negativos": 0,
+  "precisao": 1,
+  "cobertura": 1,
+  "f1": 1,
+  "regras": [
+    {
+      "id": "cpf",
+      "rotulo": "CPF",
+      "categoria": "Identificacao",
+      "acertos": 6,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "cns",
+      "rotulo": "cartão do SUS",
+      "categoria": "Saude",
+      "acertos": 2,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "cartao",
+      "rotulo": "cartão de pagamento",
+      "categoria": "Financeiro",
+      "acertos": 1,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "telefone",
+      "rotulo": "telefone",
+      "categoria": "Contato",
+      "acertos": 6,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "email",
+      "rotulo": "e-mail",
+      "categoria": "Contato",
+      "acertos": 3,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "rg",
+      "rotulo": "RG",
+      "categoria": "Identificacao",
+      "acertos": 1,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "data-nascimento",
+      "rotulo": "data de nascimento",
+      "categoria": "Identificacao",
+      "acertos": 1,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "nome-declarado",
+      "rotulo": "nome",
+      "categoria": "Identificacao",
+      "acertos": 2,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "endereco-residencial",
+      "rotulo": "endereço residencial",
+      "categoria": "Localizacao",
+      "acertos": 4,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "placa",
+      "rotulo": "placa de veículo",
+      "categoria": "Identificacao",
+      "acertos": 2,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "senha-texto",
+      "rotulo": "senha",
+      "categoria": "Credencial",
+      "acertos": 4,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "token-jwt",
+      "rotulo": "token de acesso",
+      "categoria": "Credencial",
+      "acertos": 1,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "hash-senha",
+      "rotulo": "hash de senha",
+      "categoria": "Credencial",
+      "acertos": 1,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "chave-acesso",
+      "rotulo": "chave de acesso",
+      "categoria": "Credencial",
+      "acertos": 1,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "saude-condicao",
+      "rotulo": "dado de saúde",
+      "categoria": "Saude",
+      "acertos": 14,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    },
+    {
+      "id": "saude-cid10",
+      "rotulo": "código de doença (CID)",
+      "categoria": "Saude",
+      "acertos": 1,
+      "falsos_positivos": 0,
+      "falsos_negativos": 0
+    }
+  ],
+  "erros": []
+}

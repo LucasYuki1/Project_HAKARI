@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: hakari
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hakari_dev}
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"   # só a própria máquina; o celular fala com a API, nunca com o banco
     volumes:
       - hakari-db-data:/var/lib/postgresql/data
     healthcheck:

@@ -4,6 +4,7 @@ using Hakari.Api.Aplicacao;
 using Hakari.Api.Infra;
 using Hakari.Api.Workers;
 using Hakari.Domain.Interfaces;
+using Hakari.Domain.Privacidade;
 using Hakari.Infrastructure;
 using Hakari.Infrastructure.Dados;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -30,6 +31,7 @@ builder.Services.Configure<MqttOpcoes>(config.GetSection("Mqtt"));
 // Cada interface é ligada à sua implementação aqui; os controllers só conhecem as interfaces.
 builder.Services.AddInfraestrutura(connectionString);
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton(MotorPii.Padrao); // regras de regras-pii.json, carregadas uma vez
 builder.Services.AddSingleton<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPosteService, PosteService>();
@@ -57,7 +59,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = jwt.Emissor,
             ValidAudience = jwt.Audiencia,
             IssuerSigningKey = jwt.ChaveDeAssinatura(),
-            NameClaimType = "name",
             RoleClaimType = "role",
             ClockSkew = TimeSpan.FromMinutes(1)
         };

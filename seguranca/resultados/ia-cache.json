@@ -1,0 +1,181 @@
+{
+ "e24c63940ad44087ece3": {
+  "titulo_cidadao": "Anotação do técnico pode mostrar seus dados a outras pessoas",
+  "alerta_cidadao": "Quando o técnico conclui um conserto, ele escreve o que foi feito, e esse texto aparece para qualquer cidadão que abrir a ocorrência do poste. Hoje o sistema não confere esse texto antes de publicar. Se o técnico anotar seu nome completo, telefone, endereço ou algo sobre sua saúde, essas informações ficam visíveis para outras pessoas.",
+  "o_que_pode_acontecer": "Um vizinho ou desconhecido poderia ler na ocorrência o telefone, o endereço ou uma condição de saúde de quem conversou com o técnico e usar isso para contato indesejado ou golpe.",
+  "quem_e_afetado": "Quem abriu a ocorrência ou qualquer morador citado pelo técnico na anotação do conserto, caso ele escreva dados pessoais nesse texto.",
+  "nivel": "alto",
+  "o_que_o_cidadao_pode_fazer": "Evite passar ao técnico dados pessoais que não sejam necessários para o conserto e, se encontrar informação sua numa ocorrência, peça a remoção pelo canal de privacidade do Hakari.",
+  "correcao_tecnica": "Em OcorrenciaService.cs, linha 107, o texto 'solucao' do técnico é gravado e exibido a cidadãos e à manutenção sem passar pelo filtro de privacidade. Aplique o mesmo filtro usado nas descrições de cidadãos (mascarando CPF, telefone, e-mail, endereço e termos de saúde) antes de chamar ocorrencia.Resolver. Registre no sistema apenas que houve mascaramento, nunca o valor original, e adicione um teste cobrindo uma solução com telefone e CPF.",
+  "trecho_corrigido": "var tecnico = await BuscarTecnicoAsync(tecnicoId, ct);\nvar solucaoSegura = filtroPrivacidade.Mascarar(solucao);\n\nocorrencia.Resolver(tecnico, solucaoSegura, Agora);\nawait db.SaveChangesAsync(ct);\nreturn Detalhe(ocorrencia, tecnicoId, PerfilUsuario.Tecnico);",
+  "referencia_lgpd": "Art. 6º, III e VII, e Art. 46: só os dados necessários devem circular e o controlador deve adotar medidas técnicas que impeçam o acesso de terceiros não autorizados a dados pessoais.",
+  "origem": "claude-opus-5-5"
+ },
+ "27f893123fb500653907": {
+  "titulo_cidadao": "Chave que protege o login do app foi publicada na internet",
+  "alerta_cidadao": "O código do Hakari está publicado na internet e, nele, ficou exposta a chave secreta que o sistema usa para criar as chaves de acesso que o app guarda após o login. Com ela, alguém poderia fabricar uma chave falsa e entrar no sistema se passando por um cidadão ou por um técnico da manutenção. A falha está no arquivo usado em testes; o risco real depende de essa mesma chave estar em uso no sistema oficial ou em algum ambiente com dados de verdade.",
+  "o_que_pode_acontecer": "Uma pessoa mal-intencionada poderia acessar a conta de um cidadão e ver o nome, o e-mail, o telefone e as ocorrências abertas por ele, ou agir como técnico e alterar ocorrências.",
+  "quem_e_afetado": "Todos os cidadãos cadastrados e os técnicos, caso essa chave seja a mesma usada no sistema em funcionamento.",
+  "nivel": "alto",
+  "o_que_o_cidadao_pode_fazer": "Você não precisa fazer nada agora além de ficar atento a ocorrências ou alterações na sua conta que você não reconheça e avisar o suporte se notar algo estranho.",
+  "correcao_tecnica": "Remova o valor de Jwt:Chave do appsettings.Development.json e passe a lê-lo de dotnet user-secrets no desenvolvimento e de variável de ambiente (Jwt__Chave) ou cofre de segredos em produção. Como o valor já está no histórico do Git público, considere-o comprometido: gere uma nova chave aleatória de pelo menos 256 bits, troque-a em todos os ambientes (invalidando os tokens emitidos) e, se possível, limpe o histórico. Faça a inicialização falhar caso a chave não esteja configurada.",
+  "trecho_corrigido": "\"Jwt\": {\n  \"Chave\": \"\"\n}\n// Program.cs\nvar chave = builder.Configuration[\"Jwt:Chave\"]\n  ?? throw new InvalidOperationException(\"Jwt:Chave não configurada\");\n// dev: dotnet user-secrets set \"Jwt:Chave\" \"<valor>\"",
+  "referencia_lgpd": "Art. 46 da LGPD, pois o controlador deve adotar medidas técnicas para proteger os dados pessoais contra acessos não autorizados, e uma chave de assinatura pública permite exatamente esse acesso.",
+  "origem": "claude-opus-5-5"
+ },
+ "e8dd8dbddcfaa555b210": {
+  "titulo_cidadao": "Senha de técnico ficou visível no código publicado na internet",
+  "alerta_cidadao": "Uma senha usada para criar a conta de técnico de manutenção foi gravada no código do Hakari, que fica publicado na internet. Se essa mesma senha estiver em uso no sistema de verdade, qualquer pessoa poderia entrar como técnico. Seus dados de cadastro, como e-mail, telefone e senha, não estão nesse arquivo.",
+  "o_que_pode_acontecer": "Se a senha valer no sistema real, um estranho poderia entrar como técnico, ler as descrições das ocorrências com o nome abreviado de quem as abriu e marcar problemas como resolvidos sem que nada tenha sido consertado.",
+  "quem_e_afetado": "Cidadãos que abriram ocorrências e escreveram algo pessoal na descrição, e todos que dependem da iluminação ser consertada de fato.",
+  "nivel": "alto",
+  "o_que_o_cidadao_pode_fazer": "Evite colocar dados pessoais, como endereço completo ou telefone, na descrição das ocorrências, e avise pelo app se um problema aparecer como resolvido sem ter sido consertado.",
+  "correcao_tecnica": "Remova o valor de Seed:SenhaTecnico do appsettings.Development.json e passe a lê-lo de dotnet user-secrets em desenvolvimento ou da variável de ambiente Seed__SenhaTecnico nos demais ambientes. Faça o seed falhar se o valor não estiver configurado, em vez de usar um padrão. Troque imediatamente a senha de qualquer conta de técnico que tenha usado esse valor. Considere o valor comprometido, pois ele continua no histórico do Git, e limpe o histórico se for viável.",
+  "trecho_corrigido": "// appsettings.Development.json\n\"Seed\": { \"SenhaTecnico\": \"\" }\n\n// Seed\nvar senha = config[\"Seed:SenhaTecnico\"];\nif (string.IsNullOrWhiteSpace(senha))\n    throw new InvalidOperationException(\"Defina Seed__SenhaTecnico via user-secrets ou variável de ambiente.\");",
+  "referencia_lgpd": "Art. 46 da LGPD, porque o controlador deve adotar medidas de segurança contra acessos não autorizados, e uma credencial publicada abre acesso indevido aos dados das ocorrências.",
+  "origem": "claude-opus-5-5"
+ },
+ "888d32e7ef2a0566ab02": {
+  "titulo_cidadao": "Chave de acesso do app fica desprotegida no celular",
+  "alerta_cidadao": "O app guarda no seu celular a chave de acesso que mantém você conectado, mas sem proteção. Se alguém pegar seu celular desbloqueado, acessar uma cópia de segurança do aparelho ou instalar um programa malicioso com controle total do sistema, pode copiar essa chave e entrar na sua conta sem saber sua senha. Isso depende de alguém ter acesso ao seu aparelho ou ao backup dele.",
+  "o_que_pode_acontecer": "Outra pessoa poderia usar sua conta, ver seu nome, e-mail, telefone e suas ocorrências, e abrir ou alterar reclamações em seu nome até a chave expirar.",
+  "quem_e_afetado": "Todos os cidadãos e técnicos que fazem login no app, principalmente quem perde o celular, empresta o aparelho ou faz backups sem proteção.",
+  "nivel": "alto",
+  "o_que_o_cidadao_pode_fazer": "Mantenha o celular com senha ou biometria e, se perder o aparelho, troque sua senha no Hakari assim que possível.",
+  "correcao_tecnica": "Em mobile/src/dados/banco.ts, função salvarSessao (linha 79), o token não deve ser gravado na tabela sessao do SQLite. Grave o token com expo-secure-store (Keystore no Android, Keychain no iOS) e mantenha no SQLite apenas dados não sensíveis, removendo a coluna token e apagando valores já gravados em migração. Ajuste a leitura da sessão e o logout para usar getItemAsync/deleteItemAsync, e considere invalidar no servidor tokens emitidos antes da correção.",
+  "trecho_corrigido": "import * as SecureStore from 'expo-secure-store';\n\nexport async function salvarSessao(s: Sessao) {\n  await SecureStore.setItemAsync('hakari_token', s.token, { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY });\n  banco.runSync(\n    `INSERT INTO sessao (id, expira_em, usuario_id, nome, perfil) VALUES (1, ?, ?, ?, ?)\n     ON CONFLICT(id) DO UPDATE SET expira_em = excluded.expira_em,\n       usuario_id = excluded.usuario_id, nome = excluded.nome, perfil = excluded.perfil`,\n    [s.expiraEm, s.usuario.id, s.usuario.nome, s.usuario.perfil],\n  );\n}",
+  "referencia_lgpd": "Art. 46 da LGPD, pois o controlador deve adotar medidas de segurança técnicas para proteger dados pessoais contra acessos não autorizados, e guardar a credencial em texto puro permite que terceiros assumam a conta do titular.",
+  "origem": "claude-opus-5-5"
+ },
+ "ecba5ad24c9edea49798": {
+  "titulo_cidadao": "Senha padrão do banco de dados está publicada na internet",
+  "alerta_cidadao": "O banco de dados do Hakari guarda seu nome, e-mail, telefone e os problemas que você reporta. O código publicado na internet traz uma senha padrão para esse banco, usada sempre que a equipe esquece de configurar uma senha própria. Se isso acontecer num servidor acessível pela rede, qualquer pessoa que leia o código poderia entrar no banco.",
+  "o_que_pode_acontecer": "Se o servidor subir sem senha própria e a porta do banco estiver acessível, alguém poderia copiar, alterar ou apagar os cadastros e as ocorrências dos cidadãos.",
+  "quem_e_afetado": "Todos os cidadãos cadastrados no app e os técnicos cujos dados e relatos ficam no banco, caso o servidor rode com a senha padrão.",
+  "nivel": "moderado",
+  "o_que_o_cidadao_pode_fazer": "Use no Hakari uma senha que você não repete em outros serviços, para limitar o prejuízo caso os dados sejam expostos.",
+  "correcao_tecnica": "Em api/docker-compose.yml, linha 11, remova o valor padrão de POSTGRES_PASSWORD e use a sintaxe ${VAR:?} para que o compose falhe se a variável não estiver definida. Defina a senha via arquivo .env fora do controle de versão (listado no .gitignore) ou via secrets, e publique só um .env.example sem valor real. Como a senha padrão já está no histórico do Git, troque-a em qualquer ambiente que a use, e considere expor a porta 5433 apenas em 127.0.0.1.",
+  "trecho_corrigido": "      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}\n    ports:\n      - \"127.0.0.1:5433:5432\"",
+  "referencia_lgpd": "Art. 46 da LGPD, pois o controlador deve adotar medidas de segurança para proteger os dados pessoais contra acessos não autorizados, e uma credencial publicada anula essa proteção.",
+  "origem": "claude-opus-5-5"
+ },
+ "0dbd0fb4a75bc73034d4": {
+  "titulo_cidadao": "Banco de dados do app aceita conexões de outros aparelhos da rede",
+  "alerta_cidadao": "O lugar onde o Hakari guarda os dados dos cidadãos está configurado para aceitar tentativas de acesso de qualquer aparelho conectado à mesma rede do computador que o roda. Lá ficam nome, e-mail, telefone e as descrições dos problemas que você reportou. Para alguém chegar a esses dados, precisaria estar nessa mesma rede e ainda acertar a senha do banco.",
+  "o_que_pode_acontecer": "Se alguém na mesma rede descobrir ou adivinhar a senha do banco, poderia ler, alterar ou apagar nomes, e-mails, telefones e ocorrências dos cidadãos.",
+  "quem_e_afetado": "Todos os cidadãos cadastrados e os técnicos cujos dados estão no banco, caso alguém na mesma rede do servidor consiga entrar.",
+  "nivel": "moderado",
+  "o_que_o_cidadao_pode_fazer": "Use no Hakari uma senha que você não repita em outros serviços, assim um eventual vazamento atinge só este app.",
+  "correcao_tecnica": "No api/docker-compose.yml, linha 13, publique a porta do PostgreSQL apenas na interface de loopback, trocando \"5433:5432\" por \"127.0.0.1:5433:5432\". Se a API roda no mesmo compose, considere remover o mapeamento de portas e deixar o acesso só pela rede interna do Docker. Também evite o valor padrão de POSTGRES_PASSWORD e exija que a senha venha do ambiente.",
+  "trecho_corrigido": "    ports:\n      - \"127.0.0.1:5433:5432\"",
+  "referencia_lgpd": "Art. 46, porque o controlador deve adotar medidas técnicas para proteger os dados pessoais de acessos não autorizados, e deixar o banco aberto à rede amplia essa superfície sem necessidade.",
+  "origem": "claude-opus-5-5"
+ },
+ "f11c5943f3cc04ce54ea": {
+  "titulo_cidadao": "Cadastro revela se um e-mail já usa o Hakari",
+  "alerta_cidadao": "Quando alguém tenta se cadastrar com um e-mail que já existe, o app avisa que esse e-mail já está em uso. Assim, qualquer pessoa pode digitar o seu e-mail e descobrir se você tem conta no Hakari. Sua senha e seus dados não ficam expostos, mas a informação de que você usa o app fica.",
+  "o_que_pode_acontecer": "Alguém que já tem seu e-mail pode confirmar que você usa o Hakari e enviar mensagens falsas em nome do app para tentar roubar sua senha.",
+  "quem_e_afetado": "Qualquer cidadão ou técnico cadastrado, desde que outra pessoa já conheça o e-mail dele.",
+  "nivel": "moderado",
+  "o_que_o_cidadao_pode_fazer": "Desconfie de e-mails ou mensagens que dizem ser do Hakari pedindo sua senha ou link de acesso, e use no app uma senha que você não usa em outros serviços.",
+  "correcao_tecnica": "Em AuthService.cs, linha 28, o cadastro não deve responder de forma diferente quando o e-mail já existe. Retorne sempre a mesma mensagem e o mesmo código de status (por exemplo, 202 com \"Se o e-mail puder ser usado, enviaremos uma confirmação\") e, quando o e-mail já existir, envie ao dono da conta um aviso de tentativa de cadastro, em vez de informar quem fez a requisição. Complemente com limite de tentativas por IP no endpoint de cadastro, alinhando o comportamento ao do login, que já responde de forma igual.",
+  "trecho_corrigido": "const string MensagemCadastro = \"Se o e-mail puder ser usado, enviaremos uma confirmação.\";\nif (await _usuarios.ExisteEmailAsync(req.Email))\n{\n    await _email.EnviarAvisoTentativaCadastroAsync(req.Email);\n    return Resultado.Aceito(MensagemCadastro);\n}\nawait _usuarios.CriarAsync(req);\nawait _email.EnviarConfirmacaoAsync(req.Email);\nreturn Resultado.Aceito(MensagemCadastro);",
+  "referencia_lgpd": "Art. 46 da LGPD, porque o controlador deve adotar medidas de segurança que impeçam acesso não autorizado a dados pessoais, incluindo a confirmação de que um e-mail pertence a um usuário do serviço.",
+  "origem": "claude-opus-5-5"
+ },
+ "a1f182246a5039411d6b": {
+  "titulo_cidadao": "Seu nome fica legível na chave de acesso do app",
+  "alerta_cidadao": "Quando você entra no app, ele guarda no celular uma chave de acesso que leva o seu nome completo escrito de forma legível, sem proteção. Quem conseguir copiar essa chave, por exemplo alguém com acesso ao seu celular ou um aplicativo malicioso instalado nele, consegue ler o seu nome. O dado em jogo é só o nome; e-mail, telefone e senha não vão nessa chave.",
+  "o_que_pode_acontecer": "Se alguém obtiver a chave de acesso guardada no celular, poderá ligar o seu nome à sua conta no Hakari e às ocorrências que você abriu, sem precisar de senha.",
+  "quem_e_afetado": "Todos os cidadãos e técnicos que fazem login no app, caso a chave de acesso guardada no celular seja copiada por outra pessoa ou aplicativo.",
+  "nivel": "moderado",
+  "o_que_o_cidadao_pode_fazer": "Mantenha o celular com bloqueio de tela, evite instalar aplicativos de origem desconhecida e saia da conta no app se emprestar ou trocar de aparelho.",
+  "correcao_tecnica": "Em TokenService.cs (linha 50), remova a claim \"name\" do JWT: o token só precisa do identificador (sub) e do perfil (role) para autenticar e autorizar. Quando o app precisar exibir o nome do usuário, ele deve buscá-lo em um endpoint autenticado (ex.: GET /usuarios/me), e a API deve continuar resolvendo o nome abreviado do autor a partir do Id no banco. Verifique também se nenhum controller lê User.FindFirst(\"name\") e ajuste essas leituras para consultar o usuário pelo sub.",
+  "trecho_corrigido": "[\n    new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),\n    new Claim(\"role\", usuario.Perfil.ToString())\n]",
+  "referencia_lgpd": "Art. 6º, III (necessidade): o nome não é necessário para autenticar nem autorizar, então não deve trafegar nem ficar armazenado em claro no token guardado no aparelho.",
+  "origem": "claude-opus-5-5"
+ },
+ "735173808646c32387f6": {
+  "titulo_cidadao": "Senha do banco de dados ficou visível no código publicado",
+  "alerta_cidadao": "A senha que dá acesso ao banco de dados do Hakari foi escrita num arquivo do código publicado na internet, que qualquer pessoa pode ler. Esse banco guarda nome, e-mail, telefone e senha de cadastro dos cidadãos, além das descrições das ocorrências. Pela configuração, essa senha é de um ambiente de testes, então o risco real depende de alguém também conseguir chegar ao servidor do banco ou de a mesma senha ser usada no sistema oficial.",
+  "o_que_pode_acontecer": "Se a mesma senha valer no sistema oficial ou alguém alcançar esse banco, poderia ler ou alterar nomes, e-mails, telefones e relatos dos cidadãos.",
+  "quem_e_afetado": "Todos os cidadãos cadastrados no app, caso a senha exposta também abra o banco usado de verdade.",
+  "nivel": "moderado",
+  "o_que_o_cidadao_pode_fazer": "Use no Hakari uma senha que você não repete em outros serviços e fique atento a e-mails ou mensagens estranhas que citem seu cadastro.",
+  "correcao_tecnica": "Remova a senha de api/src/Hakari.Api/appsettings.Development.json (linha 5) e passe a ler a connection string de user-secrets em desenvolvimento e da variável de ambiente ConnectionStrings__Hakari nos demais ambientes. Como a senha já está no histórico do Git público, troque-a imediatamente no PostgreSQL e confirme que ela não é reutilizada em homologação ou produção. Considere adicionar um scanner de segredos (ex.: gitleaks) no CI para barrar novos commits com credenciais.",
+  "trecho_corrigido": "\"ConnectionStrings\": { \"Hakari\": \"Host=localhost;Port=5433;Database=hakari;Username=hakari\" }  // senha via: dotnet user-secrets set \"ConnectionStrings:Hakari\" \"Host=localhost;Port=5433;Database=hakari;Username=hakari;Password=<nova>\"  ou env ConnectionStrings__Hakari",
+  "referencia_lgpd": "Art. 46, pois o controlador deve adotar medidas de segurança técnicas para proteger os dados pessoais contra acessos não autorizados, e publicar a credencial do banco compromete essa proteção.",
+  "origem": "claude-opus-5-5"
+ },
+ "4d8d5ffc3135098c8c9b": {
+  "manchete": "Hakari está em risco crítico (96,7 de 100): dados de cidadãos podem ser expostos e as correções são conhecidas e viáveis",
+  "resumo_executivo": "A auditoria desta versão do Hakari encontrou 9 falhas abertas e nenhum risco aceito, com nota de risco para o cidadão de 96,7 em 100. O maior peso vem de senhas e chaves do sistema que ficaram no código publicado na internet, seguido de possíveis informações de saúde e de contato que os cidadãos escrevem nas descrições das ocorrências. Hoje essas descrições são mostradas a outros cidadãos sem nenhum filtro: num teste simulado com dados falsos, sem filtro, houve 26 vazamentos em 9 saídas verificadas. Ainda não há um mecanismo automático que detecte e esconda dados pessoais no texto. Não há indício de que alguém tenha explorado essas falhas, mas elas precisam ser corrigidas antes de ampliar o uso do app.",
+  "principais_riscos": [
+   "O que o cidadão escreve ao reportar um poste aparece para outros cidadãos sem filtro. Se alguém incluir telefone, endereço ou uma condição de saúde (por exemplo, 'sou cadeirante e moro aqui'), qualquer usuário do app pode ler. Isso pode expor a pessoa a golpes, assédio ou constrangimento.",
+   "Senhas do banco de dados e a chave que assina os acessos ao sistema estão no código publicado na internet, e o banco aceita conexões da rede local. Quem tiver acesso a essa rede ou ao servidor poderia ler nomes, e-mails e telefones dos cadastrados, ou se passar por um usuário.",
+   "A chave de acesso que o app guarda no celular fica sem proteção e carrega dados pessoais dentro dela. Se alguém pegar o celular ou instalar um programa malicioso, pode entrar na conta do cidadão. Além disso, a tela de cadastro revela se um e-mail já usa o Hakari, o que ajuda golpistas a saber quem usa o serviço."
+  ],
+  "proximos_passos": [
+   "Retirar do código publicado todas as senhas e chaves, trocá-las imediatamente (as antigas devem ser consideradas comprometidas), passar a lê-las de variáveis de ambiente e deixar o banco acessível só pela própria API (LGPD, art. 46).",
+   "Criar um filtro de privacidade que esconda telefone, e-mail, CPF e menções a saúde nas descrições antes de mostrá-las a outros cidadãos, e repetir o teste com dados falsos com o filtro ligado até zerar os vazamentos (LGPD, art. 6º, III e art. 46).",
+   "No app, guardar a chave de acesso no armazenamento protegido do celular e tirar dela nome, e-mail e telefone, deixando só um identificador (LGPD, art. 6º, III e art. 46).",
+   "Fazer o cadastro responder sempre com a mesma mensagem neutra, exista ou não o e-mail, e rodar nova auditoria completa para apresentar à prefeitura a nota de risco após as correções (LGPD, art. 46 e art. 50)."
+  ],
+  "origem": "claude-opus-5-5"
+ },
+ "ae9ae21f5578752efbd1": {
+  "titulo_cidadao": "Senha de teste do banco aparece no código publicado",
+  "alerta_cidadao": "O código do Hakari, publicado na internet, traz uma senha padrão para o banco de dados usado só nos computadores da equipe durante o desenvolvimento. Esse banco de teste não tem dados reais de cidadãos e só aceita conexões do próprio computador onde roda. No servidor de verdade, a senha do banco é outra, criada de forma aleatória e guardada fora do código, por isso o risco ficou baixo.",
+  "o_que_pode_acontecer": "Só se alguém já tivesse acesso ao computador de um desenvolvedor poderia entrar no banco de teste, que não guarda nome, e-mail ou telefone de cidadãos reais.",
+  "quem_e_afetado": "Na prática, nenhum cidadão: a senha vale apenas para o banco de teste local da equipe, sem dados reais.",
+  "nivel": "baixo",
+  "o_que_o_cidadao_pode_fazer": "Você não precisa fazer nada; seus dados ficam no servidor, que usa uma senha diferente e secreta.",
+  "correcao_tecnica": "Risco aceito e mitigado: a porta está presa a 127.0.0.1 e a produção usa senha aleatória em /etc/hakari/hakari.env. Para eliminar o padrão de vez, troque o fallback por uma exigência explícita no api/docker-compose.yml (linha 11), fazendo o compose falhar se POSTGRES_PASSWORD não estiver definida, e documente a variável num .env.example sem valor. Isso evita que alguém reutilize o arquivo em outro ambiente e suba o banco com a senha publicada.",
+  "trecho_corrigido": "POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}",
+  "referencia_lgpd": "Art. 46 da LGPD, que exige medidas de segurança técnicas para proteger dados pessoais contra acessos não autorizados, o que inclui não depender de credenciais padrão conhecidas.",
+  "origem": "claude-opus-5-5"
+ },
+ "a4b0279215de1d25c7d2": {
+  "titulo_cidadao": "Cadastro revela se um e-mail já tem conta no Hakari",
+  "alerta_cidadao": "Quando alguém tenta criar uma conta com um e-mail que já está cadastrado, o app avisa que esse e-mail já está em uso. Com isso, uma pessoa que conheça o seu e-mail consegue descobrir se você usa o Hakari, mas não vê seu nome, telefone, senha nem suas ocorrências. A equipe considerou o risco baixo, porque usar um app de iluminação pública revela pouco sobre a sua vida, e planeja limitar o número de tentativas de cadastro para dificultar testes em massa.",
+  "o_que_pode_acontecer": "Alguém que já tem seu e-mail pode confirmar que você usa o Hakari e usar essa informação para tentar enganar você com mensagens falsas em nome do app.",
+  "quem_e_afetado": "Cidadãos e técnicos cadastrados cujo e-mail seja conhecido por outra pessoa.",
+  "nivel": "baixo",
+  "o_que_o_cidadao_pode_fazer": "Desconfie de e-mails ou mensagens em nome do Hakari que peçam sua senha ou cliquem em links estranhos, e use uma senha que você não repete em outros serviços.",
+  "correcao_tecnica": "O risco foi aceito, mas a mitigação precisa sair do papel: aplicar rate limiting por IP no Nginx (limit_req) e na API (Microsoft.AspNetCore.RateLimiting) no endpoint de cadastro. Como melhoria, o AuthService.cs (linha 28) pode responder sempre com a mesma mensagem genérica e enviar ao e-mail informado um aviso de que já existe conta, igualando o comportamento ao do login. Registre a decisão e reavalie se o cadastro passar a coletar dados mais sensíveis.",
+  "trecho_corrigido": "if (await _usuarios.ExisteEmailAsync(req.Email))\n{\n    await _email.EnviarAvisoContaExistenteAsync(req.Email);\n    return Result.Ok(\"Se o e-mail for válido, você receberá as instruções para concluir o cadastro.\");\n}\n// Program.cs\nbuilder.Services.AddRateLimiter(o => o.AddFixedWindowLimiter(\"cadastro\", l => { l.PermitLimit = 5; l.Window = TimeSpan.FromMinutes(1); }));",
+  "referencia_lgpd": "Art. 46, porque o controlador deve adotar medidas de segurança que impeçam acessos não autorizados a dados pessoais, incluindo a confirmação de que um e-mail pertence a um usuário do serviço.",
+  "origem": "claude-opus-5-5"
+ },
+ "793bee978d97b919e041": {
+  "manchete": "Hakari chega a risco baixo (6,5 de 100) para o cidadão, sem nenhuma falha de privacidade em aberto",
+  "resumo_executivo": "A auditoria mais recente do Hakari mediu risco de 6,5 em 100 para o cidadão, classificado como baixo, e não encontrou nenhuma falha em aberto. Restam dois riscos pequenos, aceitos de forma consciente pela equipe e justificados: uma senha de testes que aparece no código publicado na internet e uma mensagem do cadastro que confirma se um e-mail já tem conta. Um teste com dados fictícios verificou 9 pontos onde o sistema devolve informações e não encontrou nenhum vazamento. A ferramenta que localiza dados pessoais acertou todos os 76 casos de teste e mapeou 36 campos de dados pessoais no código, o que dá confiança ao resultado.",
+  "principais_riscos": [
+   "Senha de testes visível no código publicado na internet: ela só vale para o banco de dados de testes no computador do desenvolvedor, que não tem dados reais e só aceita conexões vindas da própria máquina. O servidor oficial usa outra senha, criada ao acaso e guardada fora do código. Para causar dano, alguém precisaria já ter acesso ao computador do desenvolvedor, por isso o risco é baixo.",
+   "Cadastro revela se um e-mail já usa o Hakari: qualquer pessoa que tente se cadastrar com o e-mail de outra pode descobrir que essa pessoa tem conta no app. Isso expõe pouco, pois indica apenas o uso de um serviço de iluminação pública. Sem limite de tentativas, alguém poderia testar listas de e-mails em grande quantidade."
+  ],
+  "proximos_passos": [
+   "Implantar, com prazo definido, o limite de tentativas de cadastro por endereço de internet (no Nginx e na API), já planejado para reduzir o teste de e-mails em massa, em linha com o dever de segurança do art. 46 da LGPD.",
+   "Confirmar periodicamente que o servidor oficial usa apenas a senha aleatória guardada fora do código e nunca a senha de testes.",
+   "Repetir a auditoria automática e o teste com dados fictícios a cada nova versão, para manter o risco baixo e sem falhas em aberto.",
+   "Reavaliar os dois riscos aceitos sempre que o app ganhar novas funções ou novos tipos de dados pessoais."
+  ],
+  "origem": "claude-opus-5-5"
+ },
+ "e5f5935ba870f7bcb785": {
+  "manchete": "Hakari sem falhas abertas de privacidade: risco ao cidadão baixo (6,5 de 100), com dois pontos conhecidos e controlados",
+  "resumo_executivo": "A auditoria automática da versão atual do Hakari (commit 4470f4f) não encontrou nenhuma falha aberta que exponha dados de cidadãos. O risco ficou em 6,5 de 100, classificado como baixo. Um teste que simula o uso real do sistema com dados falsos verificou 9 saídas e não achou nenhum vazamento. A ferramenta que identifica dados pessoais no código acertou todos os 76 casos de checagem. Restam dois riscos conhecidos e aceitos pela equipe, ambos de baixo impacto, e um deles ainda tem uma proteção planejada que precisa ser concluída.",
+  "principais_riscos": [
+   "Uma senha padrão aparece no código publicado na internet. Ela serve só ao banco de dados de teste, no computador do desenvolvedor, sem dados reais, e esse banco aceita conexões apenas da própria máquina. No servidor de verdade, a senha é outra, criada ao acaso e guardada fora do código. Por isso, essa senha não abre os dados dos cidadãos.",
+   "Na tela de cadastro, o sistema avisa quando um e-mail já tem conta. Com isso, alguém poderia testar e-mails para descobrir se uma pessoa usa o Hakari. Saber que alguém usa um app de iluminação pública revela pouco. Mas, sem limite de tentativas, essa checagem pode ser repetida muitas vezes.",
+   "As contas guardam nome, e-mail, telefone e senha, e a maior parte do risco que resta está ligada às senhas e aos contatos. Hoje não há falha aberta sobre esses dados. Eles continuam sendo o ponto que mais exige cuidado nas próximas versões."
+  ],
+  "proximos_passos": [
+   "Concluir a proteção prometida para o cadastro: limitar tentativas por IP no Nginx (limit_req_zone/limit_req no bloco do endpoint de cadastro) e na API (AddRateLimiter com política de janela fixa aplicada via RequireRateLimiting na rota de registro), em linha com a LGPD art. 46 (medidas de segurança).",
+   "Avaliar trocar a mensagem de cadastro por uma resposta neutra (\"se o e-mail for válido, você receberá instruções\") e enviar o aviso de conta existente por e-mail, reduzindo a confirmação de cadastro a terceiros, conforme LGPD art. 6º, VII (segurança) e art. 46.",
+   "Retirar a senha fixa do arquivo de configuração de desenvolvimento, lendo-a de variável de ambiente (ex.: POSTGRES_PASSWORD=${POSTGRES_PASSWORD} com .env fora do código publicado), e manter o banco local preso a 127.0.0.1, conforme LGPD art. 46.",
+   "Manter a auditoria automática e o teste com dados falsos a cada nova versão, documentando os riscos aceitos e suas revisões, como prestação de contas exigida pela LGPD art. 6º, X."
+  ],
+  "origem": "claude-opus-5-5"
+ }
+}

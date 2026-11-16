@@ -32,7 +32,8 @@ ESP32 no poste ──MQTT──> broker ──> API Hakari (.NET + PostgreSQL) �
 | [`iot`](iot) | Physical Computing | Sketch do ESP32, circuito do Wokwi e documentação | [YouTube](https://youtu.be/5VemTcVYxiI) |
 | [`api`](api) | SOA e Web Services · C# Software Development | API REST, banco, testes e evidências | — |
 | [`mobile`](mobile) | Mobile Development & IOT | App em Expo com React Native e TypeScript | [YouTube](https://youtu.be/vBNsQpimQ6A) |
-| [`infra`](infra) | Operating Systems | Provisionamento e monitoramento em Linux | — |
+| [`infra`](infra) | Operating Systems | Provisionamento e monitoramento em Linux | [YouTube](https://youtu.be/cPQ85GJY4b0) |
+| [`seguranca`](seguranca) | Cybersecurity | Motor de PII, taint analysis, alertas via IA e painel Risco Cidadão | [YouTube](https://youtu.be/9-7lvfZ55Fg) |
 
 O uso de IA em cada parte está registrado em [`prompts.md`](prompts.md). Todos os dados de pessoas
 são fictícios; os dados do SP156 são públicos e não têm dados pessoais.

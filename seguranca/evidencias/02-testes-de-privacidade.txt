@@ -1,0 +1,40 @@
+# dotnet test api/Hakari.slnx --filter FullyQualifiedName~Privacidade
+# 14/11/2026 21:48 · .NET 10.0.201
+
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Cartao_de_pagamento_confere_o_luhn(cartao: "4111 1111 1111 1112", valido: False)
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Cartao_de_pagamento_confere_o_luhn(cartao: "4111 1111 1111 1111", valido: True)
+Aprovado Hakari.Tests.Privacidade.CorpusPiiTests.Toda_regra_tem_pelo_menos_um_caso_positivo_no_corpus
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Filtrar_troca_so_o_dado_pessoal_pelo_marcador(entrada: "Liga no (11) 98765-4321 depois das 18h", esperado: "Liga no [telefone oculto] depois das 18h")
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Filtrar_troca_so_o_dado_pessoal_pelo_marcador(entrada: "Sou diabética e moro sozinha", esperado: "Sou [dado de saúde oculto] e moro sozinha")
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Filtrar_troca_so_o_dado_pessoal_pelo_marcador(entrada: "Moro na Rua das Acácias, 123 e está escuro", esperado: "Moro na [endereço residencial oculto] e está escur"···)
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Filtrar_troca_so_o_dado_pessoal_pelo_marcador(entrada: "minha senha é Hakari@2026", esperado: "minha senha é [senha oculta]")
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Filtrar_troca_so_o_dado_pessoal_pelo_marcador(entrada: "O poste fica num ponto cego", esperado: "O poste fica num ponto cego")
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Filtrar_troca_so_o_dado_pessoal_pelo_marcador(entrada: "Meu CPF é 529.982.247-25", esperado: "Meu CPF é [CPF oculto]")
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Filtrar_troca_so_o_dado_pessoal_pelo_marcador(entrada: "Lâmpada apagada na Av. Paulista, 1578", esperado: "Lâmpada apagada na Av. Paulista, 1578")
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Cartao_do_sus_confere_a_soma_ponderada(cns: "198 7654 3210 0004", valido: False)
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Cartao_do_sus_confere_a_soma_ponderada(cns: "198 7654 3210 0003", valido: True)
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Cpf_so_vale_com_digito_verificador_correto(cpf: "52998224725", valido: True)
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Cpf_so_vale_com_digito_verificador_correto(cpf: "529.982.247-25", valido: True)
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Cpf_so_vale_com_digito_verificador_correto(cpf: "529.982.247-24", valido: False)
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Cpf_so_vale_com_digito_verificador_correto(cpf: "12345", valido: False)
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Cpf_so_vale_com_digito_verificador_correto(cpf: "111.111.111-11", valido: False)
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Regra_nova_entra_so_com_configuracao
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Telefone_exige_ddd_valido_e_formato_brasileiro(telefone: "(20) 98765-4321", valido: False)
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Telefone_exige_ddd_valido_e_formato_brasileiro(telefone: "(11) 88765-4321", valido: False)
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Telefone_exige_ddd_valido_e_formato_brasileiro(telefone: "+55 21 99876-5432", valido: True)
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Telefone_exige_ddd_valido_e_formato_brasileiro(telefone: "(11) 98765-4321", valido: True)
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Telefone_exige_ddd_valido_e_formato_brasileiro(telefone: "11 3456-7890", valido: True)
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Texto_sem_dado_pessoal_passa_igual
+Aprovado Hakari.Tests.Privacidade.CorpusPiiTests.Motor_atinge_precisao_e_cobertura_minimas_no_corpus
+Aprovado Hakari.Tests.Privacidade.CorpusPiiTests.Texto_filtrado_nunca_contem_o_trecho_original
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Texto_enorme_e_hostil_nao_trava_o_motor
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Regra_com_validador_desconhecido_falha_ao_carregar
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Achado_diz_o_tipo_do_dado_mas_nunca_carrega_o_valor
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Filtrar_conta_o_que_escondeu_sem_repetir
+Aprovado Hakari.Tests.Privacidade.MotorPiiTests.Regras_carregam_do_arquivo_embutido_com_ids_unicos
+Aprovado Hakari.Tests.Privacidade.TaintCanarioTests.Com_o_motor_nenhum_canario_chega_a_uma_saida
+Aprovado Hakari.Tests.Privacidade.TaintCanarioTests.Controle_sem_regras_prova_que_o_teste_enxerga_o_vazamento
+Aprovado Hakari.Tests.Privacidade.TaintCanarioTests.Grava_o_relatorio_dos_canarios_quando_pedido
+Total de testes: 34
+Aprovados: 34
+Tempo total: 3,5918 Segundos

@@ -1,0 +1,424 @@
+{
+  "_sobre": "Corpus de regressão do motor de PII: textos como os de um reporte real, com as regras que precisam disparar. Valores fictícios (CPF e CNS válidos só no dígito verificador).",
+  "casos": [
+    {
+      "texto": "Meu CPF é 529.982.247-25, me liguem se precisar",
+      "esperado": [
+        "cpf"
+      ]
+    },
+    {
+      "texto": "cpf 52998224725",
+      "esperado": [
+        "cpf"
+      ],
+      "nota": "sem pontuação"
+    },
+    {
+      "texto": "Pode confirmar com o documento 111.444.777-35",
+      "esperado": [
+        "cpf"
+      ]
+    },
+    {
+      "texto": "O CPF da minha mãe é 390.533.447-05",
+      "esperado": [
+        "cpf"
+      ]
+    },
+    {
+      "texto": "meu cpf é 123.456.789-00, acho que errei um número",
+      "esperado": [
+        "cpf"
+      ],
+      "nota": "dígito errado, mas a pessoa disse que é CPF"
+    },
+    {
+      "texto": "Protocolo 123.456.789-00 da prefeitura",
+      "esperado": [],
+      "nota": "parece CPF, falha no dígito e não há contexto"
+    },
+    {
+      "texto": "Número do chamado 12345678900",
+      "esperado": [],
+      "nota": "11 dígitos que não são CPF nem telefone"
+    },
+    {
+      "texto": "Liga no (11) 98765-4321 que eu explico",
+      "esperado": [
+        "telefone"
+      ]
+    },
+    {
+      "texto": "whats 11987654321",
+      "esperado": [
+        "telefone"
+      ]
+    },
+    {
+      "texto": "Telefone fixo: (11) 3456-7890",
+      "esperado": [
+        "telefone"
+      ]
+    },
+    {
+      "texto": "+55 21 99876-5432 é o meu número",
+      "esperado": [
+        "telefone"
+      ]
+    },
+    {
+      "texto": "Me chama no zap 21 9 8765 4321",
+      "esperado": [
+        "telefone"
+      ],
+      "nota": "celular com espaços"
+    },
+    {
+      "texto": "Ligue 0800 123 4567 para falar com a concessionária",
+      "esperado": [],
+      "nota": "0800 não é telefone pessoal"
+    },
+    {
+      "texto": "Ligaram do (20) 98765-4321",
+      "esperado": [],
+      "nota": "DDD 20 não existe"
+    },
+    {
+      "texto": "O ônibus 8705-10 passa aqui na frente",
+      "esperado": []
+    },
+    {
+      "texto": "O telefone da prefeitura é 156",
+      "esperado": []
+    },
+    {
+      "texto": "manda e-mail para maria.silva@gmail.com",
+      "esperado": [
+        "email"
+      ]
+    },
+    {
+      "texto": "Contato: joao_pereira+hakari@empresa.com.br",
+      "esperado": [
+        "email"
+      ]
+    },
+    {
+      "texto": "o e-mail não chegou até agora",
+      "esperado": []
+    },
+    {
+      "texto": "Sou diabética e quase caí no escuro",
+      "esperado": [
+        "saude-condicao"
+      ]
+    },
+    {
+      "texto": "Minha mãe é cadeirante e não consegue passar pela calçada escura",
+      "esperado": [
+        "saude-condicao"
+      ]
+    },
+    {
+      "texto": "Tenho baixa visão e à noite não enxergo nada nessa rua",
+      "esperado": [
+        "saude-condicao"
+      ]
+    },
+    {
+      "texto": "Meu filho é autista e tem medo do escuro",
+      "esperado": [
+        "saude-condicao"
+      ]
+    },
+    {
+      "texto": "Estou grávida de 7 meses e tropecei no buraco",
+      "esperado": [
+        "saude-condicao"
+      ]
+    },
+    {
+      "texto": "Faço quimioterapia e volto tarde do hospital",
+      "esperado": [
+        "saude-condicao"
+      ]
+    },
+    {
+      "texto": "Meu pai teve um AVC ano passado e anda devagar",
+      "esperado": [
+        "saude-condicao"
+      ]
+    },
+    {
+      "texto": "Tenho epilepsia e essa luz piscando me faz mal",
+      "esperado": [
+        "saude-condicao"
+      ],
+      "nota": "relevante: poste piscando"
+    },
+    {
+      "texto": "O poste pisca o tempo todo e eu tenho convulsões",
+      "esperado": [
+        "saude-condicao"
+      ]
+    },
+    {
+      "texto": "Sou surdo e não ouço os carros quando está escuro",
+      "esperado": [
+        "saude-condicao"
+      ]
+    },
+    {
+      "texto": "Uso cadeira de rodas e a rampa fica no escuro",
+      "esperado": [
+        "saude-condicao"
+      ]
+    },
+    {
+      "texto": "Minha avó caiu e fraturou o braço por causa da escuridão",
+      "esperado": [
+        "saude-condicao"
+      ]
+    },
+    {
+      "texto": "O poste fica num ponto cego da rua",
+      "esperado": [],
+      "nota": "ponto cego não é dado de saúde"
+    },
+    {
+      "texto": "Rua sem saída, um beco cego e sem luz",
+      "esperado": [],
+      "nota": "beco cego não é dado de saúde"
+    },
+    {
+      "texto": "Derrame de óleo na pista perto do poste",
+      "esperado": [],
+      "nota": "derrame de óleo não é AVC"
+    },
+    {
+      "texto": "A pressão da água está baixa desde ontem",
+      "esperado": [],
+      "nota": "não confundir com pressão alta"
+    },
+    {
+      "texto": "CID F32.1 no meu atestado",
+      "esperado": [
+        "saude-cid10"
+      ]
+    },
+    {
+      "texto": "Luz de LED queimou, modelo X12.5",
+      "esperado": [],
+      "nota": "parece CID, mas não há contexto de saúde"
+    },
+    {
+      "texto": "Cartão SUS 198 7654 3210 0003",
+      "esperado": [
+        "cns"
+      ]
+    },
+    {
+      "texto": "meu cns é 201234567890018",
+      "esperado": [
+        "cns"
+      ]
+    },
+    {
+      "texto": "Meu RG é 12.345.678-9",
+      "esperado": [
+        "rg"
+      ]
+    },
+    {
+      "texto": "Nasci em 03/04/1990 e moro aqui desde criança",
+      "esperado": [
+        "data-nascimento"
+      ]
+    },
+    {
+      "texto": "O poste HKR-001 está apagado desde 19/11/2026",
+      "esperado": [],
+      "nota": "data sem contexto de nascimento e código do poste"
+    },
+    {
+      "texto": "Meu nome é Carlos Eduardo Lima e estou sem luz",
+      "esperado": [
+        "nome-declarado"
+      ]
+    },
+    {
+      "texto": "Eu sou a Ana Paula, moradora do bairro",
+      "esperado": [
+        "nome-declarado"
+      ]
+    },
+    {
+      "texto": "Meu nome não importa, só arrumem a luz",
+      "esperado": []
+    },
+    {
+      "texto": "Eu sou o morador do 12",
+      "esperado": [],
+      "nota": "minúscula não é nome próprio"
+    },
+    {
+      "texto": "O carro de placa ABC1D23 bateu no poste",
+      "esperado": [
+        "placa"
+      ]
+    },
+    {
+      "texto": "A moto placa FRT-4521 fugiu depois de derrubar o poste",
+      "esperado": [
+        "placa"
+      ]
+    },
+    {
+      "texto": "A placa de sinalização caiu",
+      "esperado": []
+    },
+    {
+      "texto": "Moro na Rua das Acácias, 123 e a rua está escura",
+      "esperado": [
+        "endereco-residencial"
+      ]
+    },
+    {
+      "texto": "minha casa fica na Travessa São Jorge, nº 45",
+      "esperado": [
+        "endereco-residencial"
+      ]
+    },
+    {
+      "texto": "Moro na Av. Brasil 500",
+      "esperado": [
+        "endereco-residencial"
+      ]
+    },
+    {
+      "texto": "Lâmpada piscando na Av. Paulista, 1578",
+      "esperado": [],
+      "nota": "endereço do poste é público"
+    },
+    {
+      "texto": "Coordenadas -23.5614, -46.6559",
+      "esperado": []
+    },
+    {
+      "texto": "CEP 01310-200",
+      "esperado": []
+    },
+    {
+      "texto": "minha senha é Hakari@2026, alguém trocou",
+      "esperado": [
+        "senha-texto"
+      ]
+    },
+    {
+      "texto": "senha: 12345678",
+      "esperado": [
+        "senha-texto"
+      ]
+    },
+    {
+      "texto": "password=Segredo#1",
+      "esperado": [
+        "senha-texto"
+      ]
+    },
+    {
+      "texto": "A senha do wifi do posto é casa1234",
+      "esperado": [
+        "senha-texto"
+      ],
+      "nota": "senha com complemento"
+    },
+    {
+      "texto": "A senha precisa ter 8 caracteres",
+      "esperado": [],
+      "nota": "fala de senha sem revelar uma"
+    },
+    {
+      "texto": "minha senha é muito fraca",
+      "esperado": [],
+      "nota": "palavra comum não é senha"
+    },
+    {
+      "texto": "token eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U",
+      "esperado": [
+        "token-jwt"
+      ]
+    },
+    {
+      "texto": "hash $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
+      "esperado": [
+        "hash-senha"
+      ]
+    },
+    {
+      "texto": "chave sk-ant-api03-abcdefghijklmnopqrstuvwxyz0123",
+      "esperado": [
+        "chave-acesso"
+      ]
+    },
+    {
+      "texto": "o token de acesso expirou",
+      "esperado": []
+    },
+    {
+      "texto": "cartão de crédito 4111 1111 1111 1111",
+      "esperado": [
+        "cartao"
+      ]
+    },
+    {
+      "texto": "Valor da conta: R$ 1.578,00",
+      "esperado": []
+    },
+    {
+      "texto": "cartão de visita da empresa de manutenção",
+      "esperado": []
+    },
+    {
+      "texto": "Lâmpada apagada há três dias, a rua fica muito escura",
+      "esperado": []
+    },
+    {
+      "texto": "Tem um buraco enorme perto do poste 3",
+      "esperado": []
+    },
+    {
+      "texto": "Horário: 22:15, a luz apagou 3 vezes",
+      "esperado": []
+    },
+    {
+      "texto": "Desde 2019 a rua é escura",
+      "esperado": []
+    },
+    {
+      "texto": "O sinal 4G aqui é fraco e o poste não comunica",
+      "esperado": []
+    },
+    {
+      "texto": "Fio solto pendurado, risco de choque",
+      "esperado": []
+    },
+    {
+      "texto": "Sou a Ana, CPF 529.982.247-25, telefone (11) 98765-4321 e sou hipertensa",
+      "esperado": [
+        "cpf",
+        "telefone",
+        "saude-condicao"
+      ]
+    },
+    {
+      "texto": "Moro na Rua dos Canários, 77. Meu e-mail é ana@exemplo.com e sou cadeirante",
+      "esperado": [
+        "endereco-residencial",
+        "email",
+        "saude-condicao"
+      ]
+    }
+  ]
+}

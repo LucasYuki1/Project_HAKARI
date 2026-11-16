@@ -1,0 +1,50 @@
+# Auditoria de privacidade em cada push e pull request. Bloqueia o merge quando:
+# - uma regra Semgrep deixa de passar nos próprios casos de teste;
+# - a varredura acha um vazamento de dado pessoal ou segredo de severidade ERROR em aberto;
+# - um teste de privacidade da API falha (motor de PII ou canários).
+# Roda sem IA: a tradução para o cidadão é feita localmente, com a chave de quem audita.
+name: Privacidade
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  auditoria:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Instalar o Semgrep
+        run: pip install semgrep==1.183.0
+
+      - name: Testar as regras (casos ruleid/ok)
+        env:
+          SEMGREP_ENABLE_VERSION_CHECK: "0"
+        run: semgrep --test --metrics=off --config seguranca/regras/ seguranca/regras/testes/
+
+      - name: Auditoria (Semgrep + motor de PII + canários + Risco Cidadão)
+        env:
+          SEMGREP_ENABLE_VERSION_CHECK: "0"
+          DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+        run: python seguranca/auditar.py --rotulo ci --sem-ia
+
+      - name: Guardar o retrato da auditoria
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: retrato-privacidade
+          path: seguranca/resultados/ultimo.json

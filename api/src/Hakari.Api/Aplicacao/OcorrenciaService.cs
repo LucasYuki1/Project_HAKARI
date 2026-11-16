@@ -2,6 +2,7 @@ using Hakari.Api.Contratos;
 using Hakari.Domain.Entidades;
 using Hakari.Domain.Enums;
 using Hakari.Domain.Excecoes;
+using Hakari.Domain.Privacidade;
 using Hakari.Infrastructure.Dados;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,9 +21,10 @@ public interface IOcorrenciaService
 
 /// <summary>
 /// Casos de uso das ocorrências (F5, F6, F7). O serviço só busca e salva; quem decide se algo
-/// pode acontecer são os métodos da entidade Ocorrencia.
+/// pode acontecer são os métodos da entidade Ocorrencia. Todo texto livre passa pelo motor de PII
+/// antes de ser guardado, porque outros cidadãos e a manutenção vão lê-lo.
 /// </summary>
-public class OcorrenciaService(HakariDbContext db, TimeProvider relogio) : IOcorrenciaService
+public class OcorrenciaService(HakariDbContext db, TimeProvider relogio, MotorPii privacidade) : IOcorrenciaService
 {
     private DateTime Agora => relogio.GetUtcNow().UtcDateTime;
 
@@ -30,6 +32,7 @@ public class OcorrenciaService(HakariDbContext db, TimeProvider relogio) : IOcor
                                                      CancellationToken ct)
     {
         Ocorrencia.ValidarDescricao(pedido.Descricao);
+        var descricao = privacidade.Filtrar(pedido.Descricao);
 
         var poste = await db.Postes.FirstOrDefaultAsync(p => p.Id == posteId, ct)
                     ?? throw new NaoEncontradoException("Poste não encontrado");
@@ -48,11 +51,18 @@ public class OcorrenciaService(HakariDbContext db, TimeProvider relogio) : IOcor
             return new ReporteResponse(ativa.Id, true, "Este problema já está registrado. Seu apoio foi adicionado.");
         }
 
-        var nova = Ocorrencia.AbrirPorCidadao(poste, cidadao, pedido.Categoria, pedido.Descricao, Agora);
+        var nova = Ocorrencia.AbrirPorCidadao(poste, cidadao, pedido.Categoria, descricao, Agora);
         db.Ocorrencias.Add(nova);
         await db.SaveChangesAsync(ct);
-        return new ReporteResponse(nova.Id, false, $"Ocorrência #{nova.Id} aberta");
+        return new ReporteResponse(nova.Id, false, MensagemDeAbertura(nova.Id, descricao));
     }
+
+    /// <summary>Se o motor escondeu algo, o cidadão fica sabendo o quê e por quê.</summary>
+    private static string MensagemDeAbertura(int id, TextoSeguro descricao) =>
+        descricao.OcultouDados
+            ? $"Ocorrência #{id} aberta. Para proteger você, escondemos da descrição: " +
+              $"{string.Join(", ", descricao.DadosOcultados)}. Outras pessoas veem a descrição sem esses dados."
+            : $"Ocorrência #{id} aberta";
 
     public async Task ApoiarAsync(int ocorrenciaId, int cidadaoId, CancellationToken ct)
     {
@@ -104,7 +114,7 @@ public class OcorrenciaService(HakariDbContext db, TimeProvider relogio) : IOcor
         var ocorrencia = await CarregarCompletaAsync(ocorrenciaId, rastrear: true, ct);
         var tecnico = await BuscarTecnicoAsync(tecnicoId, ct);
 
-        ocorrencia.Resolver(tecnico, solucao, Agora);
+        ocorrencia.Resolver(tecnico, privacidade.Filtrar(solucao), Agora);
         await db.SaveChangesAsync(ct);
         return Detalhe(ocorrencia, tecnicoId, PerfilUsuario.Tecnico);
     }

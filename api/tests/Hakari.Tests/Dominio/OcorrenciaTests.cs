@@ -12,7 +12,7 @@ public class OcorrenciaTests
 
     private static Ocorrencia NovaDoCidadao(Cidadao? autor = null) =>
         Ocorrencia.AbrirPorCidadao(Fabrica.Poste(), autor ?? Fabrica.Cidadao(), CategoriaProblema.LampadaPiscando,
-                                   "Lâmpada piscando", Agora);
+                                   Fabrica.Texto("Lâmpada piscando"), Agora);
 
     [Fact]
     public void Reporte_do_cidadao_abre_ocorrencia_aberta_com_historico()
@@ -31,7 +31,7 @@ public class OcorrenciaTests
     public void Reporte_sem_descricao_e_recusado(string? descricao)
     {
         var erro = Assert.Throws<ValidacaoException>(() =>
-            Ocorrencia.AbrirPorCidadao(Fabrica.Poste(), Fabrica.Cidadao(), CategoriaProblema.Outro, descricao!, Agora));
+            Ocorrencia.AbrirPorCidadao(Fabrica.Poste(), Fabrica.Cidadao(), CategoriaProblema.Outro, Fabrica.Texto(descricao), Agora));
 
         Assert.Equal("Descreva o problema", erro.Message);
     }
@@ -42,7 +42,7 @@ public class OcorrenciaTests
         var ocorrencia = NovaDoCidadao();
 
         var erro = Assert.Throws<RegraDeNegocioException>(() =>
-            ocorrencia.Resolver(Fabrica.Tecnico(), "Lâmpada trocada", Agora));
+            ocorrencia.Resolver(Fabrica.Tecnico(), Fabrica.Texto("Lâmpada trocada"), Agora));
 
         Assert.Equal("Assuma a ocorrência antes de resolvê-la", erro.Message);
         Assert.Equal(StatusOcorrencia.Aberta, ocorrencia.Status);
@@ -58,7 +58,7 @@ public class OcorrenciaTests
         Assert.Equal(StatusOcorrencia.EmAtendimento, ocorrencia.Status);
         Assert.Same(tecnico, ocorrencia.Responsavel);
 
-        ocorrencia.Resolver(tecnico, "Reator substituído", Agora.AddMinutes(40));
+        ocorrencia.Resolver(tecnico, Fabrica.Texto("Reator substituído"), Agora.AddMinutes(40));
         Assert.Equal(StatusOcorrencia.Resolvida, ocorrencia.Status);
         Assert.Equal(Agora.AddMinutes(40), ocorrencia.ResolvidaEm);
         Assert.Equal(3, ocorrencia.Historico.Count);
@@ -81,7 +81,7 @@ public class OcorrenciaTests
         ocorrencia.Assumir(Fabrica.Tecnico("Rafael Mendes"), Agora);
 
         Assert.Throws<RegraDeNegocioException>(() =>
-            ocorrencia.Resolver(Fabrica.Tecnico("Outro Técnico"), "feito", Agora));
+            ocorrencia.Resolver(Fabrica.Tecnico("Outro Técnico"), Fabrica.Texto("feito"), Agora));
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public class OcorrenciaTests
         var tecnico = Fabrica.Tecnico();
         ocorrencia.Assumir(tecnico, Agora);
 
-        Assert.Throws<ValidacaoException>(() => ocorrencia.Resolver(tecnico, " ", Agora));
+        Assert.Throws<ValidacaoException>(() => ocorrencia.Resolver(tecnico, Fabrica.Texto(" "), Agora));
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class OcorrenciaTests
         var ocorrencia = NovaDoCidadao();
         var tecnico = Fabrica.Tecnico();
         ocorrencia.Assumir(tecnico, Agora);
-        ocorrencia.Resolver(tecnico, "feito", Agora);
+        ocorrencia.Resolver(tecnico, Fabrica.Texto("feito"), Agora);
 
         Assert.Throws<RegraDeNegocioException>(() => ocorrencia.Apoiar(Fabrica.Cidadao("Bruno Lima"), Agora));
     }

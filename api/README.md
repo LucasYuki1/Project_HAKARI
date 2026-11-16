@@ -67,9 +67,22 @@ Pré-requisitos: .NET SDK 10 e Docker.
 
 ```bash
 cd api
-docker compose up -d                       # PostgreSQL em localhost:5433
+docker compose up -d                       # PostgreSQL em 127.0.0.1:5433
 dotnet run --project src/Hakari.Api        # aplica as migrações, semeia os dados e abre o Swagger
 ```
+
+Na primeira vez, defina os segredos de desenvolvimento. Eles ficam no user-secrets do .NET, na sua
+máquina, fora do Git (o `appsettings.Development.json` não guarda senha nem chave):
+
+```bash
+cd api
+dotnet user-secrets set --project src/Hakari.Api "ConnectionStrings:Hakari" "Host=localhost;Port=5433;Database=hakari;Username=hakari;Password=hakari_dev"
+dotnet user-secrets set --project src/Hakari.Api "Jwt:Chave" "<pelo menos 32 caracteres aleatórios>"
+dotnet user-secrets set --project src/Hakari.Api "Seed:SenhaTecnico" "<8+ caracteres, com letras e números>"
+```
+
+A senha `hakari_dev` é a do banco local do `docker-compose.yml`, que só aceita conexões da própria
+máquina.
 
 A API sobe em http://localhost:5080. O Swagger abre em http://localhost:5080/swagger.
 
@@ -89,8 +102,8 @@ dotnet test
 ### Dados iniciais
 
 - Seis postes em São Paulo (`HKR-001` a `HKR-006`). O `HKR-001` é o nó do Wokwi.
-- Um técnico de manutenção: `tecnico@hakari.dev`. A senha de demonstração está em
-  `src/Hakari.Api/appsettings.Development.json` (`Seed:SenhaTecnico`).
+- Um técnico de manutenção: `tecnico@hakari.dev`, com a senha que você definiu em `Seed:SenhaTecnico`
+  (para consultar: `dotnet user-secrets list --project src/Hakari.Api`).
 - Cidadãos se cadastram por `POST /api/auth/cadastro`.
 
 ### Configuração fora do desenvolvimento

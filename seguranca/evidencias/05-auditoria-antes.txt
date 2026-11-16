@@ -1,0 +1,168 @@
+# seguranca/.venv/Scripts/python seguranca/auditar.py --ref 4470f4f --rotulo antes --ignorar-aceites
+# 15/11/2026 14:17 · commit 4470f4f · Semgrep 1.183.0 · IA claude-opus-5-5
+
+RISCO CIDADÃO: 96,7 de 100 (Crítico)
+  Contribuição por tipo de dado: Credencial 34,7; Saúde 20,2; Contato 13,5; Identificação 11,3; Texto livre 7,8; Localização pessoal 6,7; Infraestrutura 2,5
+  Fórmula: 100 × (1 − Π(1 − p)), p = 0,3 × sensibilidade × exposição × gravidade
+
+VARREDURA: 132 arquivos, 23 regras. Dados pessoais mapeados: 38 campos.
+ACHADOS: 9 abertos, 0 aceitos
+
+  [ABERTO · ERROR] Texto livre publicado sem filtro de privacidade
+    hakari.taint.texto-livre-sem-filtro · api/src/Hakari.Api/Aplicacao/OcorrenciaService.cs:107 · Art. 6º, III (necessidade) e VII (segurança); Art. 46
+    Alerta ao cidadão (claude-opus-5-5, nível alto): Anotação do técnico pode mostrar seus dados a outras pessoas
+      Quando o técnico conclui um conserto, ele escreve o que foi feito, e esse texto aparece para
+      qualquer cidadão que abrir a ocorrência do poste. Hoje o sistema não confere esse texto antes
+      de publicar. Se o técnico anotar seu nome completo, telefone, endereço ou algo sobre sua
+      saúde, essas informações ficam visíveis para outras pessoas.
+    Correção sugerida:
+      Em OcorrenciaService.cs, linha 107, o texto 'solucao' do técnico é gravado e exibido a
+      cidadãos e à manutenção sem passar pelo filtro de privacidade. Aplique o mesmo filtro usado
+      nas descrições de cidadãos (mascarando CPF, telefone, e-mail, endereço e termos de saúde)
+      antes de chamar ocorrencia.Resolver. Registre no sistema apenas que houve mascaramento, nunca
+      o valor original, e adicione um teste cobrindo uma solução com telefone e CPF.
+
+  [ABERTO · ERROR] Segredo em arquivo de configuração versionado
+    hakari.segredo.config-versionada · api/src/Hakari.Api/appsettings.Development.json:9 · Art. 46 (segurança)
+    Alerta ao cidadão (claude-opus-5-5, nível alto): Chave que protege o login do app foi publicada na internet
+      O código do Hakari está publicado na internet e, nele, ficou exposta a chave secreta que o
+      sistema usa para criar as chaves de acesso que o app guarda após o login. Com ela, alguém
+      poderia fabricar uma chave falsa e entrar no sistema se passando por um cidadão ou por um
+      técnico da manutenção. A falha está no arquivo usado em testes; o risco real depende de essa
+      mesma chave estar em uso no sistema oficial ou em algum ambiente com dados de verdade.
+    Correção sugerida:
+      Remova o valor de Jwt:Chave do appsettings.Development.json e passe a lê-lo de dotnet user-
+      secrets no desenvolvimento e de variável de ambiente (Jwt__Chave) ou cofre de segredos em
+      produção. Como o valor já está no histórico do Git público, considere-o comprometido: gere uma
+      nova chave aleatória de pelo menos 256 bits, troque-a em todos os ambientes (invalidando os
+      tokens emitidos) e, se possível, limpe o histórico. Faça a inicialização falhar caso a chave
+      não esteja configurada.
+
+  [ABERTO · ERROR] Segredo em arquivo de configuração versionado
+    hakari.segredo.config-versionada · api/src/Hakari.Api/appsettings.Development.json:17 · Art. 46 (segurança)
+    Alerta ao cidadão (claude-opus-5-5, nível alto): Senha de técnico ficou visível no código publicado na internet
+      Uma senha usada para criar a conta de técnico de manutenção foi gravada no código do Hakari,
+      que fica publicado na internet. Se essa mesma senha estiver em uso no sistema de verdade,
+      qualquer pessoa poderia entrar como técnico. Seus dados de cadastro, como e-mail, telefone e
+      senha, não estão nesse arquivo.
+    Correção sugerida:
+      Remova o valor de Seed:SenhaTecnico do appsettings.Development.json e passe a lê-lo de dotnet
+      user-secrets em desenvolvimento ou da variável de ambiente Seed__SenhaTecnico nos demais
+      ambientes. Faça o seed falhar se o valor não estiver configurado, em vez de usar um padrão.
+      Troque imediatamente a senha de qualquer conta de técnico que tenha usado esse valor.
+      Considere o valor comprometido, pois ele continua no histórico do Git, e limpe o histórico se
+      for viável.
+
+  [ABERTO · ERROR] Token de acesso salvo sem criptografia no celular
+    hakari.taint.credencial-em-armazenamento-local · mobile/src/dados/banco.ts:79 · Art. 46 (medidas de segurança)
+    Alerta ao cidadão (claude-opus-5-5, nível alto): Chave de acesso do app fica desprotegida no celular
+      O app guarda no seu celular a chave de acesso que mantém você conectado, mas sem proteção. Se
+      alguém pegar seu celular desbloqueado, acessar uma cópia de segurança do aparelho ou instalar
+      um programa malicioso com controle total do sistema, pode copiar essa chave e entrar na sua
+      conta sem saber sua senha. Isso depende de alguém ter acesso ao seu aparelho ou ao backup
+      dele.
+    Correção sugerida:
+      Em mobile/src/dados/banco.ts, função salvarSessao (linha 79), o token não deve ser gravado na
+      tabela sessao do SQLite. Grave o token com expo-secure-store (Keystore no Android, Keychain no
+      iOS) e mantenha no SQLite apenas dados não sensíveis, removendo a coluna token e apagando
+      valores já gravados em migração. Ajuste a leitura da sessão e o logout para usar
+      getItemAsync/deleteItemAsync, e considere invalidar no servidor tokens emitidos antes da
+      correção.
+
+  [ABERTO · WARNING] Senha padrão publicada no repositório
+    hakari.segredo.senha-padrao · api/docker-compose.yml:11 · Art. 46 (segurança)
+    Alerta ao cidadão (claude-opus-5-5, nível moderado): Senha padrão do banco de dados está publicada na internet
+      O banco de dados do Hakari guarda seu nome, e-mail, telefone e os problemas que você reporta.
+      O código publicado na internet traz uma senha padrão para esse banco, usada sempre que a
+      equipe esquece de configurar uma senha própria. Se isso acontecer num servidor acessível pela
+      rede, qualquer pessoa que leia o código poderia entrar no banco.
+    Correção sugerida:
+      Em api/docker-compose.yml, linha 11, remova o valor padrão de POSTGRES_PASSWORD e use a
+      sintaxe ${VAR:?} para que o compose falhe se a variável não estiver definida. Defina a senha
+      via arquivo .env fora do controle de versão (listado no .gitignore) ou via secrets, e publique
+      só um .env.example sem valor real. Como a senha padrão já está no histórico do Git, troque-a
+      em qualquer ambiente que a use, e considere expor a porta 5433 apenas em 127.0.0.1.
+
+  [ABERTO · WARNING] Banco de dados aberto para a rede local
+    hakari.infra.banco-exposto-na-rede · api/docker-compose.yml:13 · Art. 46 (segurança)
+    Alerta ao cidadão (claude-opus-5-5, nível moderado): Banco de dados do app aceita conexões de outros aparelhos da rede
+      O lugar onde o Hakari guarda os dados dos cidadãos está configurado para aceitar tentativas de
+      acesso de qualquer aparelho conectado à mesma rede do computador que o roda. Lá ficam nome,
+      e-mail, telefone e as descrições dos problemas que você reportou. Para alguém chegar a esses
+      dados, precisaria estar nessa mesma rede e ainda acertar a senha do banco.
+    Correção sugerida:
+      No api/docker-compose.yml, linha 13, publique a porta do PostgreSQL apenas na interface de
+      loopback, trocando "5433:5432" por "127.0.0.1:5433:5432". Se a API roda no mesmo compose,
+      considere remover o mapeamento de portas e deixar o acesso só pela rede interna do Docker.
+      Também evite o valor padrão de POSTGRES_PASSWORD e exija que a senha venha do ambiente.
+
+  [ABERTO · WARNING] Cadastro confirma se um e-mail já usa o Hakari
+    revisao-manual.enumeracao-de-email · api/src/Hakari.Api/Aplicacao/AuthService.cs:28 · Art. 46 (segurança)
+    Alerta ao cidadão (claude-opus-5-5, nível moderado): Cadastro revela se um e-mail já usa o Hakari
+      Quando alguém tenta se cadastrar com um e-mail que já existe, o app avisa que esse e-mail já
+      está em uso. Assim, qualquer pessoa pode digitar o seu e-mail e descobrir se você tem conta no
+      Hakari. Sua senha e seus dados não ficam expostos, mas a informação de que você usa o app
+      fica.
+    Correção sugerida:
+      Em AuthService.cs, linha 28, o cadastro não deve responder de forma diferente quando o e-mail
+      já existe. Retorne sempre a mesma mensagem e o mesmo código de status (por exemplo, 202 com
+      "Se o e-mail puder ser usado, enviaremos uma confirmação") e, quando o e-mail já existir,
+      envie ao dono da conta um aviso de tentativa de cadastro, em vez de informar quem fez a
+      requisição. Complemente com limite de tentativas por IP no endpoint de cadastro, alinhando o
+      comportamento ao do login, que já responde de forma igual.
+
+  [ABERTO · WARNING] Dado pessoal dentro do token de acesso
+    hakari.taint.pii-no-token · api/src/Hakari.Api/Aplicacao/TokenService.cs:50 · Art. 6º, III (necessidade)
+    Alerta ao cidadão (claude-opus-5-5, nível moderado): Seu nome fica legível na chave de acesso do app
+      Quando você entra no app, ele guarda no celular uma chave de acesso que leva o seu nome
+      completo escrito de forma legível, sem proteção. Quem conseguir copiar essa chave, por exemplo
+      alguém com acesso ao seu celular ou um aplicativo malicioso instalado nele, consegue ler o seu
+      nome. O dado em jogo é só o nome; e-mail, telefone e senha não vão nessa chave.
+    Correção sugerida:
+      Em TokenService.cs (linha 50), remova a claim "name" do JWT: o token só precisa do
+      identificador (sub) e do perfil (role) para autenticar e autorizar. Quando o app precisar
+      exibir o nome do usuário, ele deve buscá-lo em um endpoint autenticado (ex.: GET
+      /usuarios/me), e a API deve continuar resolvendo o nome abreviado do autor a partir do Id no
+      banco. Verifique também se nenhum controller lê User.FindFirst("name") e ajuste essas leituras
+      para consultar o usuário pelo sub.
+
+  [ABERTO · WARNING] Senha de banco em connection string versionada
+    hakari.segredo.connection-string · api/src/Hakari.Api/appsettings.Development.json:5 · Art. 46 (segurança)
+    Alerta ao cidadão (claude-opus-5-5, nível moderado): Senha do banco de dados ficou visível no código publicado
+      A senha que dá acesso ao banco de dados do Hakari foi escrita num arquivo do código publicado
+      na internet, que qualquer pessoa pode ler. Esse banco guarda nome, e-mail, telefone e senha de
+      cadastro dos cidadãos, além das descrições das ocorrências. Pela configuração, essa senha é de
+      um ambiente de testes, então o risco real depende de alguém também conseguir chegar ao
+      servidor do banco ou de a mesma senha ser usada no sistema oficial.
+    Correção sugerida:
+      Remova a senha de api/src/Hakari.Api/appsettings.Development.json (linha 5) e passe a ler a
+      connection string de user-secrets em desenvolvimento e da variável de ambiente
+      ConnectionStrings__Hakari nos demais ambientes. Como a senha já está no histórico do Git
+      público, troque-a imediatamente no PostgreSQL e confirme que ela não é reutilizada em
+      homologação ou produção. Considere adicionar um scanner de segredos (ex.: gitleaks) no CI para
+      barrar novos commits com credenciais.
+
+TESTE DE CANÁRIOS (simulado com o filtro desligado: esta versão não tinha o motor): 9 saídas verificadas, 26 vazamentos
+  resposta de POST /api/postes/{id}/reportes (autora)                    nenhum dado vazou
+  GET /api/ocorrencias/{id} (outro cidadão)                              CPF, telefone, e-mail, endereço residencial, dado de saúde, cartão do SUS
+  GET /api/manutencao/fila (técnico)                                     nenhum dado vazou
+  resposta de POST /api/ocorrencias/{id}/resolver (técnico)              CPF, telefone, e-mail, endereço residencial, dado de saúde, cartão do SUS
+  GET /api/ocorrencias/{id} (resolvida) (outro cidadão)                  CPF, telefone, e-mail, endereço residencial, dado de saúde, cartão do SUS
+  GET /api/ocorrencias/minhas (autora)                                   nenhum dado vazou
+  banco: ocorrencias.descricao (quem acessa o banco)                     CPF, telefone, e-mail, endereço residencial, dado de saúde, cartão do SUS
+  banco: ocorrencias.solucao (quem acessa o banco)                       telefone
+  banco: historico_ocorrencias (quem acessa o banco)                     telefone
+
+MOTOR DE PII: não existia nesta versão
+TESTES DE PRIVACIDADE: ausentes nesta versão
+IA: 10 chamada(s), 0 do cache, 18664 tokens de entrada, 11137 de saída, cerca de US$ 0,3
+
+RESUMO EXECUTIVO (claude-opus-5-5): Hakari está em risco crítico (96,7 de 100): dados de cidadãos podem ser expostos e as correções são conhecidas e viáveis
+  A auditoria desta versão do Hakari encontrou 9 falhas abertas e nenhum risco aceito, com nota de
+  risco para o cidadão de 96,7 em 100. O maior peso vem de senhas e chaves do sistema que ficaram no
+  código publicado na internet, seguido de possíveis informações de saúde e de contato que os
+  cidadãos escrevem nas descrições das ocorrências. Hoje essas descrições são mostradas a outros
+  cidadãos sem nenhum filtro: num teste simulado com dados falsos, sem filtro, houve 26 vazamentos
+  em 9 saídas verificadas. Ainda não há um mecanismo automático que detecte e esconda dados pessoais
+  no texto. Não há indício de que alguém tenha explorado essas falhas, mas elas precisam ser
+  corrigidas antes de ampliar o uso do app.

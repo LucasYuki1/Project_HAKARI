@@ -1,0 +1,21 @@
+// Casos de teste das regras de segredos (semgrep --test, modo generic). Valores falsos.
+{
+  "ConnectionStrings": {
+    // ruleid: hakari.segredo.connection-string
+    "Hakari": "Host=localhost;Port=5433;Database=hakari;Username=hakari;Password=senha_falsa",
+    // ok: hakari.segredo.connection-string
+    "Producao": ""
+  },
+  "Jwt": {
+    // ruleid: hakari.segredo.config-versionada
+    "Chave": "valor-falso-de-teste-com-tamanho",
+    // ok: hakari.segredo.config-versionada
+    "Chave2": "",
+    // ok: hakari.segredo.config-versionada
+    "Emissor": "hakari-api"
+  },
+  "Seed": {
+    // ruleid: hakari.segredo.config-versionada
+    "SenhaTecnico": "SenhaFalsa-123"
+  }
+}

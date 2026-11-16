@@ -4,7 +4,8 @@ import { definirToken, quandoSessaoExpirar } from '@/api/cliente';
 import type { Sessao } from '@/api/tipos';
 import { lerSessao, limparDadosDoUsuario, salvarSessao } from '@/dados/banco';
 
-// Guarda quem está logado. A sessão fica no SQLite, então o app abre já logado.
+// Guarda quem está logado. A sessão fica no armazenamento seguro do sistema (Keystore/Keychain),
+// então o app abre já logado sem deixar o token em texto puro no aparelho.
 
 type ContextoSessao = {
   sessao: Sessao | null;

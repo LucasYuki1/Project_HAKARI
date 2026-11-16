@@ -20,6 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Corpus de regressão do motor de PII (lido pelos testes de Privacidade). -->
+    <None Update="Privacidade\corpus-pii.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Hakari.Domain\Hakari.Domain.csproj" />
     <ProjectReference Include="..\..\src\Hakari.Infrastructure\Hakari.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Hakari.Api\Hakari.Api.csproj" />

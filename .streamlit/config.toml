@@ -1,0 +1,9 @@
+# Painel do Risco Cidadão (seguranca/painel.py). Rode da raiz: streamlit run seguranca/painel.py
+
+[browser]
+# Projeto de privacidade: o Streamlit não manda estatística de uso para fora.
+gatherUsageStats = false
+
+[theme]
+# Azul da paleta dos gráficos; o vermelho fica reservado para risco crítico.
+primaryColor = "#2a78d6"

@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Regras do motor de PII: vão dentro da DLL, então valem igual na API, nos testes e no Docker. -->
+    <EmbeddedResource Include="Privacidade\regras-pii.json" LogicalName="Hakari.Domain.Privacidade.regras-pii.json" />
+  </ItemGroup>
+
 </Project>

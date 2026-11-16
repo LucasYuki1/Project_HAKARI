@@ -1,0 +1,249 @@
+# Taint analysis do Hakari: rastreia dado pessoal desde onde ele entra (fonte) até onde ele pode
+# vazar (sorvedouro). Um fluxo só é aceito se passar por um sanitizador: o filtro de privacidade
+# (MotorPii), o hash de senha ou o nome abreviado.
+#
+# Severidade: ERROR bloqueia o pipeline; WARNING entra no Risco Cidadão, mas não bloqueia.
+# Metadados usados pelo painel: categoria (tipo de dado), saida (para onde vaza) e lgpd.
+
+rules:
+  # ---------------------------------------------------------------- C#: texto livre
+  - id: hakari.taint.texto-livre-sem-filtro
+    mode: taint
+    languages: [csharp]
+    severity: ERROR
+    message: >-
+      Texto livre digitado por um usuário chega a um registro que outros cidadãos e a manutenção
+      leem, sem passar pelo filtro de privacidade. Se a pessoa escrever CPF, telefone, endereço ou
+      um dado de saúde na descrição, qualquer um que abrir a ocorrência vai ver.
+    metadata:
+      categoria: texto-livre
+      saida: outros-usuarios
+      titulo: Texto livre publicado sem filtro de privacidade
+      lgpd: "Art. 6º, III (necessidade) e VII (segurança); Art. 46"
+      cwe: "CWE-359: Exposure of Private Personal Information to an Unauthorized Actor"
+    pattern-sources:
+      - patterns:
+          - pattern: $REQ.$CAMPO
+          - pattern-not-inside: $REQ.$CAMPO(...)
+          - metavariable-regex:
+              metavariable: $CAMPO
+              regex: ^(Descricao|Solucao|Comentario|Observacao|Mensagem)$
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  $RET $METODO(..., string $PARAM, ...) { ... }
+              - pattern-inside: |
+                  $RET $METODO(..., string? $PARAM, ...) { ... }
+          - focus-metavariable: $PARAM
+          - metavariable-regex:
+              metavariable: $PARAM
+              regex: ^(descricao|solucao|comentario|observacao|mensagem)$
+    pattern-sinks:
+      - pattern: Ocorrencia.AbrirPorCidadao(...)
+      - pattern: $OCORRENCIA.Resolver(...)
+      - pattern: $OCORRENCIA.RegistrarEvento(...)
+    pattern-sanitizers:
+      - pattern: $FILTRO.Filtrar(...)
+      - pattern: MotorPii.$METODO(...)
+
+  # ---------------------------------------------------------------- C#: logs
+  - id: hakari.taint.pii-em-log
+    mode: taint
+    languages: [csharp]
+    severity: ERROR
+    message: >-
+      Um dado pessoal vai para o log do servidor. Logs são lidos por quem opera o sistema, copiados
+      para backups e guardados por dias; o dado do cidadão não deveria estar lá.
+    metadata:
+      categoria: dado-pessoal
+      saida: logs
+      titulo: Dado pessoal gravado em log
+      lgpd: "Art. 6º, III e VII; Art. 46"
+      cwe: "CWE-532: Insertion of Sensitive Information into Log File"
+    pattern-sources: &fontes-pii-csharp
+      - patterns:
+          - pattern: $OBJ.$CAMPO
+          - pattern-not-inside: $OBJ.$CAMPO(...)
+          - metavariable-regex:
+              metavariable: $CAMPO
+              regex: ^(Nome|Email|Telefone|Celular|Cpf|Rg|Cns|Senha|SenhaHash|Token|Endereco|Descricao|Solucao)$
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: $LOG.LogTrace(...)
+              - pattern: $LOG.LogDebug(...)
+              - pattern: $LOG.LogInformation(...)
+              - pattern: $LOG.LogWarning(...)
+              - pattern: $LOG.LogError(...)
+              - pattern: $LOG.LogCritical(...)
+              - pattern: $LOG.Log(...)
+              - pattern: Console.WriteLine(...)
+              - pattern: Console.Write(...)
+              - pattern: Debug.WriteLine(...)
+              - pattern: Trace.WriteLine(...)
+    pattern-sanitizers: &sanitizadores-csharp
+      - pattern: $FILTRO.Filtrar(...)
+      - pattern: MotorPii.$METODO(...)
+      - pattern: $PESSOA.NomeAbreviado()
+      - pattern: $HASHER.Gerar(...)
+
+  # ---------------------------------------------------------------- C#: exceções
+  - id: hakari.taint.pii-em-excecao
+    mode: taint
+    languages: [csharp]
+    severity: WARNING
+    message: >-
+      Um dado pessoal entra na mensagem de uma exceção. A mensagem pode voltar na resposta da API
+      ou cair no log de erro, mostrando o dado a quem não deveria vê-lo.
+    metadata:
+      categoria: dado-pessoal
+      saida: respostas-de-erro
+      titulo: Dado pessoal em mensagem de erro
+      lgpd: "Art. 6º, VII; Art. 46"
+      cwe: "CWE-209: Generation of Error Message Containing Sensitive Information"
+    pattern-sources: *fontes-pii-csharp
+    pattern-sinks:
+      - pattern: throw new $EXCECAO(...)
+    pattern-sanitizers: *sanitizadores-csharp
+
+  # ---------------------------------------------------------------- C#: JWT
+  - id: hakari.taint.pii-no-token
+    mode: taint
+    languages: [csharp]
+    severity: WARNING
+    message: >-
+      Um dado pessoal vai dentro do token JWT. O conteúdo do JWT não é criptografado: qualquer pessoa
+      ou aplicativo que pegar o token consegue ler o dado, e o token fica guardado no celular.
+    metadata:
+      categoria: identificacao
+      saida: token
+      titulo: Dado pessoal dentro do token de acesso
+      lgpd: "Art. 6º, III (necessidade)"
+      cwe: "CWE-312: Cleartext Storage of Sensitive Information"
+    pattern-sources:
+      - patterns:
+          - pattern: $USUARIO.$CAMPO
+          - pattern-not-inside: $USUARIO.$CAMPO(...)
+          - metavariable-regex:
+              metavariable: $CAMPO
+              regex: ^(Nome|Email|Telefone|Cpf|Rg|Endereco)$
+    pattern-sinks:
+      - patterns:
+          - pattern: new Claim($TIPO, $VALOR)
+          - focus-metavariable: $VALOR
+    pattern-sanitizers: *sanitizadores-csharp
+
+  # ---------------------------------------------------------------- C#: senha
+  - id: hakari.taint.senha-sem-hash
+    mode: taint
+    languages: [csharp]
+    severity: ERROR
+    message: >-
+      A senha digitada chega à entidade ou ao banco sem passar pelo hash. Se o banco vazar, a senha
+      do cidadão vaza junto, e muita gente usa a mesma senha em outros serviços.
+    metadata:
+      categoria: credencial
+      saida: banco-de-dados
+      titulo: Senha guardada sem hash
+      lgpd: "Art. 46 (medidas de segurança)"
+      cwe: "CWE-256: Plaintext Storage of a Password"
+    pattern-sources:
+      - patterns:
+          - pattern: $REQ.$CAMPO
+          - pattern-not-inside: $REQ.$CAMPO(...)
+          - metavariable-regex:
+              metavariable: $CAMPO
+              regex: ^(Senha|NovaSenha|Password)$
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  $RET $METODO(..., string $PARAM, ...) { ... }
+              - pattern-inside: |
+                  $RET $METODO(..., string? $PARAM, ...) { ... }
+          - focus-metavariable: $PARAM
+          - metavariable-regex:
+              metavariable: $PARAM
+              regex: ^(senha|novaSenha|senhaTecnico|password)$
+    pattern-sinks:
+      - pattern: new Cidadao(...)
+      - pattern: new Tecnico(...)
+      - pattern: $DB.$TABELA.Add(...)
+    pattern-sanitizers:
+      - pattern: $HASHER.Gerar(...)
+      - pattern: BCrypt.Net.BCrypt.HashPassword(...)
+      - pattern: BCrypt.HashPassword(...)
+
+  # ---------------------------------------------------------------- TypeScript (app)
+  - id: hakari.taint.credencial-em-armazenamento-local
+    mode: taint
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      O token de acesso ou a senha é gravado no SQLite do celular em texto puro. Um backup do
+      aparelho, um app com root ou um celular perdido entregam a sessão do cidadão. Use o
+      armazenamento seguro do sistema (expo-secure-store: Keystore no Android, Keychain no iOS).
+    metadata:
+      categoria: credencial
+      saida: armazenamento-do-aparelho
+      titulo: Token de acesso salvo sem criptografia no celular
+      lgpd: "Art. 46 (medidas de segurança)"
+      cwe: "CWE-312: Cleartext Storage of Sensitive Information"
+    pattern-sources:
+      - patterns:
+          - pattern: $OBJ.$CAMPO
+          - pattern-not-inside: $OBJ.$CAMPO(...)
+          - metavariable-regex:
+              metavariable: $CAMPO
+              regex: ^(token|senha|password|refreshToken)$
+    pattern-sinks:
+      - pattern: $BANCO.runSync(...)
+      - pattern: $BANCO.runAsync(...)
+      - pattern: $BANCO.execSync(...)
+      - pattern: $BANCO.execAsync(...)
+      - pattern: AsyncStorage.setItem(...)
+      - pattern: localStorage.setItem(...)
+
+  - id: hakari.taint.pii-em-console
+    mode: taint
+    languages: [typescript]
+    severity: WARNING
+    message: >-
+      Um dado pessoal vai para o console do app. Em produção, esse log aparece no logcat do Android
+      e em ferramentas de diagnóstico.
+    metadata:
+      categoria: dado-pessoal
+      saida: logs
+      titulo: Dado pessoal no log do aplicativo
+      lgpd: "Art. 46"
+      cwe: "CWE-532: Insertion of Sensitive Information into Log File"
+    pattern-sources: &fontes-pii-ts
+      - patterns:
+          - pattern: $OBJ.$CAMPO
+          - pattern-not-inside: $OBJ.$CAMPO(...)
+          - metavariable-regex:
+              metavariable: $CAMPO
+              regex: ^(nome|email|telefone|cpf|senha|token|descricao|solucao|endereco)$
+    pattern-sinks:
+      - pattern: console.$METODO(...)
+
+  - id: hakari.taint.pii-na-url
+    mode: taint
+    languages: [typescript]
+    severity: ERROR
+    message: >-
+      Um dado pessoal vai na URL da requisição. URLs ficam gravadas no log de acesso do Nginx, em
+      proxies e no histórico; dado pessoal deve ir no corpo da requisição, nunca na URL.
+    metadata:
+      categoria: dado-pessoal
+      saida: logs
+      titulo: Dado pessoal na URL da requisição
+      lgpd: "Art. 46"
+      cwe: "CWE-598: Use of GET Request Method With Sensitive Query Strings"
+    pattern-sources: *fontes-pii-ts
+    pattern-sinks:
+      - patterns:
+          - pattern: fetch($URL, ...)
+          - focus-metavariable: $URL
+      - patterns:
+          - pattern: requisitar($METODO, $URL, ...)
+          - focus-metavariable: $URL

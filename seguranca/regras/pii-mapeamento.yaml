@@ -1,0 +1,117 @@
+# Mapeamento de PII: encontra no código onde o Hakari guarda ou transporta dado pessoal e classifica
+# cada campo. O resultado vira o "mapa de dados pessoais" do painel (o que o sistema sabe sobre o
+# cidadão e em que camada). Severidade INFO: mapear não é falha; o risco aparece nas regras de taint.
+#
+# As regras são de expressão regular porque o parser de padrões do Semgrep para C# não aceita
+# declarações de propriedade. Os grupos nomeados (?P<CAMPO>...) viram metavariáveis da mensagem.
+# C#: propriedades públicas e parâmetros de record em PascalCase. App: tipos e colunas do SQLite.
+
+rules:
+  # ---------------------------------------------------------------- C# (entidades e contratos)
+  - id: hakari.mapa.identificacao
+    languages: [csharp]
+    severity: INFO
+    message: "$CAMPO: dado de identificação da pessoa"
+    metadata: &meta-identificacao
+      categoria: identificacao
+      rotulo: Identificação
+      lgpd: "Art. 5º, I (dado pessoal)"
+    pattern-either:
+      - pattern-regex: '(?m)^\s*public\s+[\w<>?,\[\]\s]+?\s+(?P<CAMPO>Nome|NomeCompleto|NomeSocial|Cpf|Rg|Cnh|DataNascimento|Nascimento|Matricula|Genero|Sexo|Foto)\s*\{\s*get;'
+      - pattern-regex: '\b(?:string|DateTime|DateOnly|int|long)\??\s+(?P<CAMPO>Nome|NomeCompleto|NomeSocial|Cpf|Rg|Cnh|DataNascimento|Nascimento|Matricula|Genero|Sexo)\s*(?=[,)])'
+
+  - id: hakari.mapa.contato
+    languages: [csharp]
+    severity: INFO
+    message: "$CAMPO: dado de contato da pessoa"
+    metadata: &meta-contato
+      categoria: contato
+      rotulo: Contato
+      lgpd: "Art. 5º, I (dado pessoal)"
+    pattern-either:
+      - pattern-regex: '(?m)^\s*public\s+[\w<>?,\[\]\s]+?\s+(?P<CAMPO>Email|Telefone|Celular|Whatsapp)\s*\{\s*get;'
+      - pattern-regex: '\bstring\??\s+(?P<CAMPO>Email|Telefone|Celular|Whatsapp)\s*(?=[,)])'
+
+  - id: hakari.mapa.credencial
+    languages: [csharp]
+    severity: INFO
+    message: "$CAMPO: credencial de acesso"
+    metadata: &meta-credencial
+      categoria: credencial
+      rotulo: Credencial
+      lgpd: "Art. 46 (segurança)"
+    pattern-either:
+      - pattern-regex: '(?m)^\s*public\s+[\w<>?,\[\]\s]+?\s+(?P<CAMPO>Senha|SenhaHash|Password|Token|RefreshToken|Segredo)\s*\{\s*get;'
+      - pattern-regex: '\bstring\??\s+(?P<CAMPO>Senha|SenhaHash|Password|Token|RefreshToken|Segredo)\s*(?=[,)])'
+
+  - id: hakari.mapa.saude
+    languages: [csharp]
+    severity: INFO
+    message: "$CAMPO: dado de saúde (dado pessoal sensível)"
+    metadata: &meta-saude
+      categoria: saude
+      rotulo: Saúde (sensível)
+      lgpd: "Art. 5º, II e Art. 11 (dado pessoal sensível)"
+    pattern-either:
+      - pattern-regex: '(?m)^\s*public\s+[\w<>?,\[\]\s]+?\s+(?P<CAMPO>Deficiencia|Doenca|Diagnostico|Cid|Medicamento|Alergia|TipoSanguineo|Cns|CartaoSus|Gestante|CondicaoDeSaude|MobilidadeReduzida|NecessidadeEspecial)\s*\{\s*get;'
+      - pattern-regex: '\b(?:string|bool|int)\??\s+(?P<CAMPO>Deficiencia|Doenca|Diagnostico|Cid|Medicamento|Alergia|TipoSanguineo|Cns|CartaoSus|Gestante|CondicaoDeSaude|MobilidadeReduzida|NecessidadeEspecial)\s*(?=[,)])'
+
+  - id: hakari.mapa.localizacao-pessoal
+    languages: [csharp]
+    severity: INFO
+    message: "$CAMPO: localização da casa da pessoa"
+    metadata: &meta-localizacao
+      categoria: localizacao
+      rotulo: Localização pessoal
+      lgpd: "Art. 5º, I (dado pessoal)"
+    pattern-either:
+      - pattern-regex: '(?m)^\s*public\s+[\w<>?,\[\]\s]+?\s+(?P<CAMPO>EnderecoResidencial|Residencia|Cep|LatitudeResidencia|LongitudeResidencia)\s*\{\s*get;'
+      - pattern-regex: '\b(?:string|double)\??\s+(?P<CAMPO>EnderecoResidencial|Residencia|Cep|LatitudeResidencia|LongitudeResidencia)\s*(?=[,)])'
+
+  - id: hakari.mapa.texto-livre
+    languages: [csharp]
+    severity: INFO
+    message: "$CAMPO: texto livre, em que a pessoa pode escrever qualquer dado pessoal"
+    metadata: &meta-texto
+      categoria: texto-livre
+      rotulo: Texto livre
+      lgpd: "Art. 6º, III (necessidade): precisa de filtro"
+    pattern-either:
+      - pattern-regex: '(?m)^\s*public\s+[\w<>?,\[\]\s]+?\s+(?P<CAMPO>Descricao|Solucao|Comentario|Observacao)\s*\{\s*get;'
+      - pattern-regex: '\bstring\??\s+(?P<CAMPO>Descricao|Solucao|Comentario|Observacao)\s*(?=[,)])'
+
+  - id: hakari.mapa.consentimento
+    languages: [csharp]
+    severity: INFO
+    message: "$CAMPO: registro do consentimento do titular"
+    metadata:
+      categoria: consentimento
+      rotulo: Consentimento
+      lgpd: "Art. 8º (prova do consentimento)"
+    pattern-either:
+      - pattern-regex: '(?m)^\s*public\s+[\w<>?,\[\]\s]+?\s+(?P<CAMPO>TermoAceitoEm|AceitouTermo|ConsentimentoEm)\s*\{\s*get;'
+      - pattern-regex: '\b(?:bool|DateTime)\??\s+(?P<CAMPO>TermoAceitoEm|AceitouTermo|ConsentimentoEm)\s*(?=[,)])'
+
+  # ---------------------------------------------------------------- App (TypeScript)
+  - id: hakari.mapa.app-tipo
+    languages: [typescript]
+    severity: INFO
+    message: "$CAMPO: dado pessoal que o app recebe ou envia"
+    metadata:
+      categoria: app
+      rotulo: App
+      lgpd: "Art. 5º, I (dado pessoal)"
+    paths:
+      include:
+        - "**/api/tipos.ts"
+    pattern-regex: '\b(?P<CAMPO>nome|email|telefone|senha|token|descricao|solucao|cpf)\??\s*:\s*(?:string|number)\b'
+
+  - id: hakari.mapa.app-armazenamento
+    languages: [typescript]
+    severity: INFO
+    message: "$CAMPO: dado pessoal guardado no SQLite do celular"
+    metadata:
+      categoria: armazenamento-local
+      rotulo: Guardado no celular
+      lgpd: "Art. 46 (segurança)"
+    pattern-regex: '\b(?P<CAMPO>token|nome|descricao|email|telefone|senha|cpf)\s+TEXT\b'

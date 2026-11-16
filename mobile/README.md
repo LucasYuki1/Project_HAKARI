@@ -47,7 +47,7 @@ severidade, assume a ocorrência e registra a solução.
 |---|---|
 | **Telas e navegação** | Expo Router em `src/app/`: pilha principal com rotas protegidas por perfil (`_layout.tsx`), abas do cidadão em `(cidadao)/` e da manutenção em `manutencao/`, rotas dinâmicas `poste/[id]`, `ocorrencia/[id]` e `reportar/[id]` |
 | **Consumo de dados** | A API REST do projeto (`../api`). `src/api/cliente.ts` envia o token JWT, aplica tempo limite e transforma os erros da API em mensagens simples; `src/api/hakari.ts` tem uma função por endpoint |
-| **Banco de dados** | SQLite no celular (`expo-sqlite`), em `src/dados/banco.ts`: sessão (o app abre já logado), postes salvos para consulta sem internet, rascunhos de reporte e o endereço do servidor |
+| **Banco de dados** | SQLite no celular (`expo-sqlite`), em `src/dados/banco.ts`: postes salvos para consulta sem internet, rascunhos de reporte e o endereço do servidor. A sessão (o app abre já logado) fica no armazenamento seguro do sistema (`expo-secure-store`: Keystore no Android, Keychain no iOS), não em texto puro |
 | **Acessibilidade** | Ver a seção abaixo |
 | **Aderência ao problema** | A jornada segue as Features F3 a F8 de `docs/testing/features.md` |
 | **Documentação** | Este README, a Ficha na raiz e os comentários no início de cada arquivo |
@@ -91,8 +91,8 @@ npx expo start
 Leia o QR code com o Expo Go (Android) ou com a câmera (iOS).
 
 **Contas para testar:** crie uma conta de cidadão pelo próprio app. A conta de técnico é
-`tecnico@hakari.dev`, com a senha definida em `api/src/Hakari.Api/appsettings.Development.json`
-(`Seed:SenhaTecnico`).
+`tecnico@hakari.dev`, com a senha definida no user-secrets da API (`Seed:SenhaTecnico`; veja
+[`api/README.md`](../api/README.md#como-rodar)).
 
 ## Estrutura
 

@@ -84,3 +84,35 @@ meu computador.
 
 **Minha parte:** criar e configurar a VM na Azure, rodar o provisionamento e os testes de falha,
 conferir os logs e gravar o vídeo.
+
+## Cybersecurity
+
+**Pedido:** a missão da disciplina para o Hakari. Pedi três coisas:
+- mapear os dados pessoais e criar regras para CPF, saúde e senhas;
+- rastrear o fluxo desses dados e bloquear vazamentos;
+- traduzir as falhas para o cidadão com um LLM e montar o painel Risco Cidadão.
+
+**Resultado:** a pasta `seguranca/` e o motor de PII da API:
+- regras Semgrep de mapeamento de PII, de taint (fonte, sorvedouro e sanitizador) e de segredos,
+  cada uma com casos de teste;
+- o motor de PII em C# (`api/src/Hakari.Domain/Privacidade`), com regras em JSON, validadores de CPF,
+  CNS, Luhn e DDD, léxico de saúde e o tipo `TextoSeguro`;
+- o teste dinâmico com canários e o corpus de 76 textos com métricas de precisão e cobertura;
+- as correções do protótipo:
+  - texto livre filtrado;
+  - segredos de desenvolvimento no user-secrets;
+  - sessão do app no `expo-secure-store`;
+  - nome fora do JWT;
+  - banco local só em `127.0.0.1`;
+- o pipeline `auditar.py`, a fórmula do Risco Cidadão, o painel em Streamlit e o workflow de CI.
+
+**IA dentro do produto:** a auditoria chama o Claude Opus 5.5 pela API da Anthropic para escrever o
+alerta de cada falha e o resumo executivo. O código enviado vai mascarado, sem senha nem dado
+pessoal.
+
+**Minha parte:**
+- escolher o Claude e criar a chave da API;
+- autorizar a troca do armazenamento da sessão no app;
+- rodar a auditoria e conferir os alertas;
+- gravar o vídeo e tirar o print do painel.
+

@@ -1,12 +1,16 @@
+import * as SecureStore from 'expo-secure-store';
 import * as SQLite from 'expo-sqlite';
 
 import type { PosteResumo, Sessao } from '@/api/tipos';
 
 // Banco SQLite local do celular. Guarda:
 // - configuracao: o endereço do servidor da API;
-// - sessao: o login, para o cidadão não precisar entrar toda vez;
 // - postes_cache: a última lista de postes, para consultar sem internet;
 // - rascunhos: o reporte que o cidadão começou a escrever, para não perder o texto.
+// A sessão (token de acesso) não fica aqui: vai para o armazenamento seguro do sistema
+// (expo-secure-store: Keystore no Android, Keychain no iOS), que criptografa o valor.
+
+const CHAVE_SESSAO = 'hakari.sessao';
 
 const banco = SQLite.openDatabaseSync('hakari.db');
 
@@ -15,14 +19,6 @@ banco.execSync(`
   CREATE TABLE IF NOT EXISTS configuracao (
     chave TEXT PRIMARY KEY NOT NULL,
     valor TEXT NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS sessao (
-    id INTEGER PRIMARY KEY CHECK (id = 1),
-    token TEXT NOT NULL,
-    expira_em TEXT NOT NULL,
-    usuario_id INTEGER NOT NULL,
-    nome TEXT NOT NULL,
-    perfil TEXT NOT NULL
   );
   CREATE TABLE IF NOT EXISTS postes_cache (
     id INTEGER PRIMARY KEY NOT NULL,
@@ -43,6 +39,8 @@ banco.execSync(`
   );
 `);
 
+migrarSessaoDoSqlite();
+
 // ---------- Configuração ----------
 
 export function lerConfiguracao(chave: string): string | null {
@@ -57,35 +55,58 @@ export function salvarConfiguracao(chave: string, valor: string) {
   );
 }
 
-// ---------- Sessão ----------
-
-type LinhaSessao = { token: string; expira_em: string; usuario_id: number; nome: string; perfil: string };
+// ---------- Sessão (armazenamento seguro) ----------
 
 export function lerSessao(): Sessao | null {
-  const l = banco.getFirstSync<LinhaSessao>('SELECT * FROM sessao WHERE id = 1');
-  if (!l) return null;
-  if (new Date(l.expira_em).getTime() <= Date.now()) {
+  const bruto = SecureStore.getItem(CHAVE_SESSAO);
+  if (!bruto) return null;
+
+  let sessao: Sessao;
+  try {
+    sessao = JSON.parse(bruto) as Sessao;
+  } catch {
     apagarSessao();
     return null;
   }
-  return {
-    token: l.token,
-    expiraEm: l.expira_em,
-    usuario: { id: l.usuario_id, nome: l.nome, perfil: l.perfil as Sessao['usuario']['perfil'] },
-  };
+  if (new Date(sessao.expiraEm).getTime() <= Date.now()) {
+    apagarSessao();
+    return null;
+  }
+  return sessao;
 }
 
 export function salvarSessao(s: Sessao) {
-  banco.runSync(
-    `INSERT INTO sessao (id, token, expira_em, usuario_id, nome, perfil) VALUES (1, ?, ?, ?, ?, ?)
-     ON CONFLICT(id) DO UPDATE SET token = excluded.token, expira_em = excluded.expira_em,
-       usuario_id = excluded.usuario_id, nome = excluded.nome, perfil = excluded.perfil`,
-    [s.token, s.expiraEm, s.usuario.id, s.usuario.nome, s.usuario.perfil],
-  );
+  SecureStore.setItem(CHAVE_SESSAO, JSON.stringify(s));
 }
 
 export function apagarSessao() {
-  banco.runSync('DELETE FROM sessao');
+  // Esvazia na hora (a próxima leitura já não acha sessão) e remove a chave em seguida.
+  SecureStore.setItem(CHAVE_SESSAO, '');
+  void SecureStore.deleteItemAsync(CHAVE_SESSAO);
+}
+
+/**
+ * Versões anteriores do app guardavam o token no SQLite, em texto puro. Na primeira abertura depois
+ * da atualização, a sessão vai para o armazenamento seguro, a tabela é apagada e o VACUUM reescreve
+ * o arquivo do banco, para o token não sobrar nas páginas livres.
+ */
+function migrarSessaoDoSqlite() {
+  const tabela = banco.getFirstSync<{ n: number }>(
+    "SELECT count(*) AS n FROM sqlite_master WHERE type = 'table' AND name = 'sessao'",
+  );
+  if (!tabela?.n) return;
+
+  type LinhaAntiga = { token: string; expira_em: string; usuario_id: number; nome: string; perfil: string };
+  const l = banco.getFirstSync<LinhaAntiga>('SELECT * FROM sessao WHERE id = 1');
+  if (l) {
+    salvarSessao({
+      token: l.token,
+      expiraEm: l.expira_em,
+      usuario: { id: l.usuario_id, nome: l.nome, perfil: l.perfil as Sessao['usuario']['perfil'] },
+    });
+  }
+  banco.execSync('DROP TABLE sessao;');
+  banco.execSync('VACUUM;');
 }
 
 // ---------- Postes (cache para uso sem internet) ----------
@@ -143,5 +164,6 @@ export function apagarRascunho(posteId: number) {
 
 /** Apaga tudo o que é pessoal ao sair ou excluir a conta (o endereço do servidor fica). */
 export function limparDadosDoUsuario() {
-  banco.execSync('DELETE FROM sessao; DELETE FROM rascunhos; DELETE FROM postes_cache;');
+  apagarSessao();
+  banco.execSync('DELETE FROM rascunhos; DELETE FROM postes_cache;');
 }

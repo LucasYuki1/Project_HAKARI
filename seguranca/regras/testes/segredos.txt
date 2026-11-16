@@ -1,0 +1,17 @@
+# Casos de teste das regras de segredos para compose e shell (semgrep --test, modo generic).
+services:
+  db:
+    environment:
+      # ruleid: hakari.segredo.senha-padrao
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-senha_falsa}
+      # ok: hakari.segredo.senha-padrao
+      POSTGRES_USER: ${POSTGRES_USER:-hakari}
+      # ok: hakari.segredo.senha-padrao
+      JWT_CHAVE: ${JWT_CHAVE:-$(openssl rand -hex 32)}
+    ports:
+      # ruleid: hakari.infra.banco-exposto-na-rede
+      - "5433:5432"
+      # ok: hakari.infra.banco-exposto-na-rede
+      - "127.0.0.1:5434:5432"
+# ok: hakari.segredo.senha-padrao
+SENHA_TECNICO="${SENHA_TECNICO:-Hk$(openssl rand -hex 6)7}"

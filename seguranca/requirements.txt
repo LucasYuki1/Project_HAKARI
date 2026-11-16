@@ -1,0 +1,7 @@
+# Auditoria (seguranca/auditar.py)
+semgrep==1.183.0
+anthropic==2.3.0
+# Painel (seguranca/painel.py)
+streamlit==1.48.1
+pandas==2.2.3
+plotly==5.24.1

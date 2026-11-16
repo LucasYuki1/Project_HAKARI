@@ -4,6 +4,7 @@ using Hakari.Domain.Entidades;
 using Hakari.Domain.Enums;
 using Hakari.Domain.Excecoes;
 using Hakari.Domain.Interfaces;
+using Hakari.Domain.Privacidade;
 using Hakari.Tests.Suporte;
 using Microsoft.EntityFrameworkCore;
 
@@ -121,7 +122,7 @@ public class OcorrenciaServiceTests
     {
         var (db, poste, ana, bruno) = await CenarioAsync();
         await using var _ = db;
-        var servico = new OcorrenciaService(db, new RelogioFixo(Fabrica.Inicio));
+        var servico = new OcorrenciaService(db, new RelogioFixo(Fabrica.Inicio), MotorPii.Padrao);
 
         var primeiro = await servico.ReportarAsync(poste.Id, ana.Id, new ReporteRequest(CategoriaProblema.LampadaApagada, "Apagada"), default);
         var segundo = await servico.ReportarAsync(poste.Id, bruno.Id, new ReporteRequest(CategoriaProblema.LampadaApagada, "Também vi"), default);
@@ -138,7 +139,7 @@ public class OcorrenciaServiceTests
     {
         var (db, _, ana, _) = await CenarioAsync();
         await using var _db = db;
-        var servico = new OcorrenciaService(db, new RelogioFixo(Fabrica.Inicio));
+        var servico = new OcorrenciaService(db, new RelogioFixo(Fabrica.Inicio), MotorPii.Padrao);
 
         await Assert.ThrowsAsync<NaoEncontradoException>(() =>
             servico.ReportarAsync(999, ana.Id, new ReporteRequest(CategoriaProblema.Outro, "x"), default));
@@ -155,7 +156,7 @@ public class OcorrenciaServiceTests
         await db.SaveChangesAsync();
 
         var relogio = new RelogioFixo(Fabrica.Inicio);
-        var servico = new OcorrenciaService(db, relogio);
+        var servico = new OcorrenciaService(db, relogio, MotorPii.Padrao);
         var monitor = new MonitorService(db, relogio, Fabrica.Log<MonitorService>());
 
         // Alta aberta primeiro, Desastre depois: o Desastre precisa vir na frente.
@@ -177,7 +178,7 @@ public class OcorrenciaServiceTests
         var tecnico = Fabrica.Tecnico();
         db.Usuarios.Add(tecnico);
         await db.SaveChangesAsync();
-        var servico = new OcorrenciaService(db, new RelogioFixo(Fabrica.Inicio));
+        var servico = new OcorrenciaService(db, new RelogioFixo(Fabrica.Inicio), MotorPii.Padrao);
         var criada = await servico.ReportarAsync(poste.Id, ana.Id, new ReporteRequest(CategoriaProblema.LampadaApagada, "Apagada"), default);
 
         var vistaPeloBruno = await servico.DetalharAsync(criada.OcorrenciaId, bruno.Id, PerfilUsuario.Cidadao, default);

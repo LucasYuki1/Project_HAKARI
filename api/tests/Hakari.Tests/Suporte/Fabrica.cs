@@ -1,4 +1,5 @@
 using Hakari.Domain.Entidades;
+using Hakari.Domain.Privacidade;
 using Hakari.Infrastructure.Dados;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -36,4 +37,7 @@ public static class Fabrica
             .Options);
 
     public static NullLogger<T> Log<T>() => NullLogger<T>.Instance;
+
+    /// <summary>Texto livre como a API guarda: depois de passar pelo motor de PII.</summary>
+    public static TextoSeguro Texto(string? texto) => MotorPii.Padrao.Filtrar(texto);
 }

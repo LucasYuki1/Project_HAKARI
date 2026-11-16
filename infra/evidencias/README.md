@@ -1,6 +1,6 @@
 # Evidências do servidor
 
-Saídas reais da VM da Azure (Ubuntu 24.04, Standard_B2s, IP 40.124.106.65), em 14/11/2026.
+Saídas reais da VM da Azure (Ubuntu 24.04, Standard D2als v6, IP 40.124.106.65), em 14/11/2026.
 Nenhum arquivo traz senha ou chave: os segredos ficam só em `/etc/hakari/hakari.env` na VM.
 
 | Arquivo | O que mostra |

@@ -1,0 +1,177 @@
+{
+  "canarios": [
+    "CPF",
+    "telefone",
+    "e-mail",
+    "endereço residencial",
+    "dado de saúde",
+    "cartão do SUS"
+  ],
+  "execucoes": [
+    {
+      "modo": "controle",
+      "saidas_verificadas": 9,
+      "saidas": [
+        "resposta de POST /api/postes/{id}/reportes (autora)",
+        "GET /api/ocorrencias/{id} (outro cidadão)",
+        "GET /api/manutencao/fila (técnico)",
+        "resposta de POST /api/ocorrencias/{id}/resolver (técnico)",
+        "GET /api/ocorrencias/{id} (resolvida) (outro cidadão)",
+        "GET /api/ocorrencias/minhas (autora)",
+        "banco: ocorrencias.descricao (quem acessa o banco)",
+        "banco: ocorrencias.solucao (quem acessa o banco)",
+        "banco: historico_ocorrencias (quem acessa o banco)"
+      ],
+      "vazamentos": [
+        {
+          "saida": "GET /api/ocorrencias/{id}",
+          "quem_le": "outro cidadão",
+          "dado": "CPF"
+        },
+        {
+          "saida": "GET /api/ocorrencias/{id}",
+          "quem_le": "outro cidadão",
+          "dado": "telefone"
+        },
+        {
+          "saida": "GET /api/ocorrencias/{id}",
+          "quem_le": "outro cidadão",
+          "dado": "e-mail"
+        },
+        {
+          "saida": "GET /api/ocorrencias/{id}",
+          "quem_le": "outro cidadão",
+          "dado": "endereço residencial"
+        },
+        {
+          "saida": "GET /api/ocorrencias/{id}",
+          "quem_le": "outro cidadão",
+          "dado": "dado de saúde"
+        },
+        {
+          "saida": "GET /api/ocorrencias/{id}",
+          "quem_le": "outro cidadão",
+          "dado": "cartão do SUS"
+        },
+        {
+          "saida": "resposta de POST /api/ocorrencias/{id}/resolver",
+          "quem_le": "técnico",
+          "dado": "CPF"
+        },
+        {
+          "saida": "resposta de POST /api/ocorrencias/{id}/resolver",
+          "quem_le": "técnico",
+          "dado": "telefone"
+        },
+        {
+          "saida": "resposta de POST /api/ocorrencias/{id}/resolver",
+          "quem_le": "técnico",
+          "dado": "e-mail"
+        },
+        {
+          "saida": "resposta de POST /api/ocorrencias/{id}/resolver",
+          "quem_le": "técnico",
+          "dado": "endereço residencial"
+        },
+        {
+          "saida": "resposta de POST /api/ocorrencias/{id}/resolver",
+          "quem_le": "técnico",
+          "dado": "dado de saúde"
+        },
+        {
+          "saida": "resposta de POST /api/ocorrencias/{id}/resolver",
+          "quem_le": "técnico",
+          "dado": "cartão do SUS"
+        },
+        {
+          "saida": "GET /api/ocorrencias/{id} (resolvida)",
+          "quem_le": "outro cidadão",
+          "dado": "CPF"
+        },
+        {
+          "saida": "GET /api/ocorrencias/{id} (resolvida)",
+          "quem_le": "outro cidadão",
+          "dado": "telefone"
+        },
+        {
+          "saida": "GET /api/ocorrencias/{id} (resolvida)",
+          "quem_le": "outro cidadão",
+          "dado": "e-mail"
+        },
+        {
+          "saida": "GET /api/ocorrencias/{id} (resolvida)",
+          "quem_le": "outro cidadão",
+          "dado": "endereço residencial"
+        },
+        {
+          "saida": "GET /api/ocorrencias/{id} (resolvida)",
+          "quem_le": "outro cidadão",
+          "dado": "dado de saúde"
+        },
+        {
+          "saida": "GET /api/ocorrencias/{id} (resolvida)",
+          "quem_le": "outro cidadão",
+          "dado": "cartão do SUS"
+        },
+        {
+          "saida": "banco: ocorrencias.descricao",
+          "quem_le": "quem acessa o banco",
+          "dado": "CPF"
+        },
+        {
+          "saida": "banco: ocorrencias.descricao",
+          "quem_le": "quem acessa o banco",
+          "dado": "telefone"
+        },
+        {
+          "saida": "banco: ocorrencias.descricao",
+          "quem_le": "quem acessa o banco",
+          "dado": "e-mail"
+        },
+        {
+          "saida": "banco: ocorrencias.descricao",
+          "quem_le": "quem acessa o banco",
+          "dado": "endereço residencial"
+        },
+        {
+          "saida": "banco: ocorrencias.descricao",
+          "quem_le": "quem acessa o banco",
+          "dado": "dado de saúde"
+        },
+        {
+          "saida": "banco: ocorrencias.descricao",
+          "quem_le": "quem acessa o banco",
+          "dado": "cartão do SUS"
+        },
+        {
+          "saida": "banco: ocorrencias.solucao",
+          "quem_le": "quem acessa o banco",
+          "dado": "telefone"
+        },
+        {
+          "saida": "banco: historico_ocorrencias",
+          "quem_le": "quem acessa o banco",
+          "dado": "telefone"
+        }
+      ],
+      "mensagem_ao_cidadao": "Ocorrência #1 aberta"
+    },
+    {
+      "modo": "protegido",
+      "saidas_verificadas": 9,
+      "saidas": [
+        "resposta de POST /api/postes/{id}/reportes (autora)",
+        "GET /api/ocorrencias/{id} (outro cidadão)",
+        "GET /api/manutencao/fila (técnico)",
+        "resposta de POST /api/ocorrencias/{id}/resolver (técnico)",
+        "GET /api/ocorrencias/{id} (resolvida) (outro cidadão)",
+        "GET /api/ocorrencias/minhas (autora)",
+        "banco: ocorrencias.descricao (quem acessa o banco)",
+        "banco: ocorrencias.solucao (quem acessa o banco)",
+        "banco: historico_ocorrencias (quem acessa o banco)"
+      ],
+      "vazamentos": [],
+      "mensagem_ao_cidadao": "Ocorrência #1 aberta. Para proteger você, escondemos da descrição: dado de saúde, endereço residencial, CPF, cartão do SUS, telefone, e-mail. Outras pessoas veem a descrição sem esses dados."
+    }
+  ]
+}

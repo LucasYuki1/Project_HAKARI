@@ -1,0 +1,106 @@
+# Senhas, chaves e tokens versionados no repositório. O repositório do Hakari é público: o que entra
+# no Git fica no histórico para sempre. As mensagens nunca repetem o valor encontrado.
+
+rules:
+  - id: hakari.segredo.config-versionada
+    languages: [generic]
+    severity: ERROR
+    message: >-
+      O arquivo de configuração versionado traz um valor em "$CHAVE". Senha e chave de assinatura
+      não podem ficar no Git: qualquer pessoa com acesso ao repositório consegue usá-las.
+    metadata:
+      categoria: credencial
+      saida: repositorio
+      titulo: Segredo em arquivo de configuração versionado
+      lgpd: "Art. 46 (segurança)"
+      cwe: "CWE-798: Use of Hard-coded Credentials"
+    paths:
+      include: ["*.json"]
+      exclude: ["package-lock.json", "package.json"]
+    pattern-regex: '"(?P<CHAVE>(?i:chave|senha\w*|password|secret|segredo|token|api_?key|client_?secret))"\s*:\s*"[^"\s]{6,}"'
+
+  - id: hakari.segredo.connection-string
+    languages: [generic]
+    severity: WARNING
+    message: >-
+      Uma connection string versionada traz a senha do banco. Leia a senha de variável de ambiente
+      ou de user-secrets.
+    metadata:
+      categoria: credencial
+      saida: repositorio
+      titulo: Senha de banco em connection string versionada
+      lgpd: "Art. 46 (segurança)"
+      cwe: "CWE-798: Use of Hard-coded Credentials"
+    paths:
+      include: ["*.json", "*.cs", "*.yml", "*.yaml", "*.conf"]
+    pattern-regex: '(?i)\b(?:password|pwd)=(?!\$\{)[^;"''\s]+'
+
+  - id: hakari.segredo.senha-padrao
+    languages: [generic]
+    severity: WARNING
+    message: >-
+      "$VAR" tem um valor padrão no arquivo. Se a variável não for definida, o serviço sobe com uma
+      senha que está publicada no repositório.
+    metadata:
+      categoria: credencial
+      saida: repositorio
+      titulo: Senha padrão publicada no repositório
+      lgpd: "Art. 46 (segurança)"
+      cwe: "CWE-1392: Use of Default Credentials"
+    paths:
+      include: ["*.yml", "*.yaml", "*.env.example", "*.sh"]
+    # Um padrão gerado na hora, como ${SENHA:-$(openssl rand -hex 24)}, não é senha publicada.
+    pattern-regex: '\$\{(?P<VAR>\w*(?:PASSWORD|SENHA|SECRET|TOKEN|CHAVE)\w*):-(?![^}]*\$\()[^}]+\}'
+
+  - id: hakari.segredo.literal-em-codigo
+    languages: [generic]
+    severity: ERROR
+    message: >-
+      "$NOME" recebe um valor fixo no código. Credencial fixa no código vai para o Git, para o
+      binário e para quem descompilar o app.
+    metadata:
+      categoria: credencial
+      saida: repositorio
+      titulo: Credencial fixa no código-fonte
+      lgpd: "Art. 46 (segurança)"
+      cwe: "CWE-798: Use of Hard-coded Credentials"
+    # O valor precisa ter pelo menos um dígito: nome de chave de armazenamento, como 'hakari.sessao',
+    # não é segredo; chave e senha geradas quase sempre têm dígitos.
+    paths:
+      include: ["*.cs", "*.ts", "*.tsx", "*.py", "*.ino", "*.h", "*.ps1"]
+      exclude: ["**/tests/**", "**/testes/**", "*Tests.cs", "*.test.ts"]
+    pattern-regex: '(?i)\b(?P<NOME>\w*(?:senha|password|passwd|secret|segredo|apikey|api_key|token|chave)\w*)\s*(?:=|:)\s*[@$]?["''](?=[^"''\s]*\d)[^"''\s]{8,}["'']'
+
+  - id: hakari.segredo.formato-conhecido
+    languages: [generic]
+    severity: ERROR
+    message: >-
+      Encontrei algo com formato de chave de serviço ($TIPO). Revogue a chave e tire o valor do Git.
+    metadata:
+      categoria: credencial
+      saida: repositorio
+      titulo: Chave de serviço exposta
+      lgpd: "Art. 46 (segurança)"
+      cwe: "CWE-798: Use of Hard-coded Credentials"
+    pattern-either:
+      - pattern-regex: '(?P<TIPO>sk-ant-)[A-Za-z0-9_-]{20,}'
+      - pattern-regex: '(?P<TIPO>ghp_)[A-Za-z0-9]{36}'
+      - pattern-regex: '(?P<TIPO>AKIA)[0-9A-Z]{16}'
+      - pattern-regex: '(?P<TIPO>AIza)[0-9A-Za-z_-]{35}'
+      - pattern-regex: '(?P<TIPO>-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----)'
+
+  - id: hakari.infra.banco-exposto-na-rede
+    languages: [generic]
+    severity: WARNING
+    message: >-
+      A porta $PORTA do PostgreSQL é publicada em todas as interfaces da máquina. Qualquer aparelho da
+      mesma rede tenta logar no banco. Publique só em 127.0.0.1.
+    metadata:
+      categoria: infraestrutura
+      saida: rede
+      titulo: Banco de dados aberto para a rede local
+      lgpd: "Art. 46 (segurança)"
+      cwe: "CWE-668: Exposure of Resource to Wrong Sphere"
+    paths:
+      include: ["*compose*.yml", "*compose*.yaml"]
+    pattern-regex: '(?m)^\s*-\s*["'']?(?P<PORTA>\d+):5432["'']?\s*$'

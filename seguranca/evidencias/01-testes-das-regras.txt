@@ -1,0 +1,35 @@
+# semgrep --test --config seguranca/regras/ seguranca/regras/testes/
+# 14/11/2026 21:50 · Semgrep 1.183.0
+
+23/23: ✓ All tests passed
+No tests for fixes found.
+
+Casos por regra (ruleid = linha que precisa ser apontada; ok = linha que não pode ser apontada)
+regra                                            ruleid   ok
+hakari.infra.banco-exposto-na-rede                    1    1
+hakari.mapa.app-armazenamento                         1    1
+hakari.mapa.app-tipo                                  1    1
+hakari.mapa.consentimento                             2    0
+hakari.mapa.contato                                   2    0
+hakari.mapa.credencial                                2    0
+hakari.mapa.identificacao                             3    2
+hakari.mapa.localizacao-pessoal                       1    2
+hakari.mapa.saude                                     2    0
+hakari.mapa.texto-livre                               1    1
+hakari.segredo.config-versionada                      2    2
+hakari.segredo.connection-string                      1    1
+hakari.segredo.formato-conhecido                      1    0
+hakari.segredo.literal-em-codigo                      2    3
+hakari.segredo.senha-padrao                           1    3
+hakari.taint.credencial-em-armazenamento-local        2    2
+hakari.taint.pii-em-console                           2    1
+hakari.taint.pii-em-excecao                           1    1
+hakari.taint.pii-em-log                               4    4
+hakari.taint.pii-na-url                               2    2
+hakari.taint.pii-no-token                             2    2
+hakari.taint.senha-sem-hash                           2    2
+hakari.taint.texto-livre-sem-filtro                   3    4
+total                                                41   35
+
+Limitação conhecida, registrada como todoruleid: em C#, depois de '?? throw', o taint do Semgrep 1.183
+perde o fluxo. Ela é coberta pelo tipo TextoSeguro e pelo teste de canários (02-testes-de-privacidade.txt).

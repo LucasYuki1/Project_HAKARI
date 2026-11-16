@@ -24,8 +24,9 @@ public interface ITokenService
 }
 
 /// <summary>
-/// Gera o JWT que o app manda no cabeçalho Authorization. Ele carrega só o id, o nome e o perfil:
-/// nada de e-mail ou telefone dentro do token.
+/// Gera o JWT que o app manda no cabeçalho Authorization. Ele carrega só o id e o perfil: o conteúdo
+/// de um JWT é legível por quem tiver o token, então nome, e-mail e telefone ficam de fora. O app
+/// recebe o nome no corpo da resposta (UsuarioResumo), não precisa tirá-lo do token.
 /// </summary>
 public class TokenService(IOptions<JwtOpcoes> opcoes, TimeProvider relogio) : ITokenService
 {
@@ -47,7 +48,6 @@ public class TokenService(IOptions<JwtOpcoes> opcoes, TimeProvider relogio) : IT
             Subject = new ClaimsIdentity(
             [
                 new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
-                new Claim("name", usuario.Nome),
                 new Claim("role", usuario.Perfil.ToString())
             ])
         };
