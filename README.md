@@ -1,7 +1,7 @@
 # Hakari: iluminação pública que se reporta sozinha
 
 **Global Solution 2026/2 · CitizenTech · FIAP Engenharia de Software**
-**Aluno:** Lucas Yuki (RM 554865)
+**Aluno:** Lucas Yuki (RM 554865) · **Pitch:** [youtu.be/K9XVYnlsK4U](https://youtu.be/K9XVYnlsK4U)
 
 ## Ficha da CitizenTech
 
@@ -27,7 +27,7 @@ ESP32 no poste ──MQTT──> broker ──> API Hakari (.NET + PostgreSQL) �
 
 | Pasta | Disciplina | O que tem | Vídeo |
 |---|---|---|---|
-| [`docs/testing`](docs/testing) | Testing, Compliance & QA | Features, critérios de aceite em Gherkin, importação no Azure Boards | — |
+| [`docs/testing`](docs/testing) | Testing, Compliance & QA | Features, critérios de aceite em Gherkin, importação no Azure Boards | [Pitch](https://youtu.be/K9XVYnlsK4U) |
 | [`ml`](ml) | Inteligência Artificial & Machine Learning | Notebook, preparo dos dados do SP156 e `RELATORIO_ML.md` | [YouTube](https://youtu.be/G1ZjQpvnstI) |
 | [`iot`](iot) | Physical Computing | Sketch do ESP32, circuito do Wokwi e documentação | [YouTube](https://youtu.be/5VemTcVYxiI) |
 | [`api`](api) | SOA e Web Services · C# Software Development | API REST, banco, testes e evidências | — |
